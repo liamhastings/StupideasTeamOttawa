@@ -5,6 +5,7 @@ import ProfileCard from "@/components/profile/ProfileCard";
 import type { DeckItem, SwipeAction } from "./types";
 
 const FLING_DISTANCE = 110; // px dragged before a release counts as a swipe
+const MIN_FLICK_OFFSET = 30; // px
 const FLING_VELOCITY = 600; // px/s flick that counts even if the drag was short
 
 interface SwipeCardProps {
@@ -42,8 +43,10 @@ export default function SwipeCard({ item, index, exitDir, onSwipe }: SwipeCardPr
       dragSnapToOrigin
       dragElastic={0.85}
       onDragEnd={(_, info) => {
-        if (info.offset.x > FLING_DISTANCE || info.velocity.x > FLING_VELOCITY) onSwipe("like");
-        else if (info.offset.x < -FLING_DISTANCE || info.velocity.x < -FLING_VELOCITY) onSwipe("pass");
+        // A flick counts only if it also moved a little (a twitchy 3px nudge isn't a decision).
+        const flick = Math.abs(info.offset.x) > MIN_FLICK_OFFSET;
+        if (info.offset.x > FLING_DISTANCE || (flick && info.velocity.x > FLING_VELOCITY)) onSwipe("like");
+        else if (info.offset.x < -FLING_DISTANCE || (flick && info.velocity.x < -FLING_VELOCITY)) onSwipe("pass");
       }}
       initial={{ scale: 1 - index * 0.05, y: index * 14, opacity: 0 }}
       animate={{ scale: 1 - index * 0.05, y: index * 14, opacity: 1 }}

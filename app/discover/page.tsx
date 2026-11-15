@@ -108,8 +108,14 @@ export default function DiscoverPage() {
         });
         const body = await readJson(res);
         if (res.status === 404) {
-          clearUserId();
-          router.replace("/onboarding");
+          if (/fromId/.test(errorText(body, ""))) {
+            // WE don't exist (db wiped): start over.
+            clearUserId();
+            router.replace("/onboarding");
+          } else {
+            // THEY don't exist anymore: the card stays gone, we stay signed in.
+            setNotice("That hacker got garbage collected before you could swipe. Next!");
+          }
           return;
         }
         if (!res.ok) throw new Error(errorText(body, `HTTP ${res.status}`));
@@ -133,7 +139,7 @@ export default function DiscoverPage() {
   const activeMatch = matchQueue[0];
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center px-4 py-6">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center overflow-x-clip px-4 py-6">
       <header className="mb-4 flex w-full items-baseline justify-between">
         <h1 className="text-2xl font-black tracking-tight">
           Discover <span className="font-mono text-sm font-normal text-neutral-500">{"// teammates.find()"}</span>

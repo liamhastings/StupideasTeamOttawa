@@ -38,6 +38,7 @@ export default function SwipeDeck({ deck, onSwipe, disabled = false }: SwipeDeck
   // ArrowLeft = pass, ArrowRight = like.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.repeat) return; // a held key must not plow through unread cards
       if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
       const t = e.target as HTMLElement | null;
       if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
@@ -58,7 +59,7 @@ export default function SwipeDeck({ deck, onSwipe, disabled = false }: SwipeDeck
   return (
     <div className="flex w-full max-w-sm flex-col items-center gap-6">
       {/* Every card sits in the same grid cell, so the stack is as tall as the tallest card. */}
-      <div className="grid w-full">
+      <div className="grid w-full grid-cols-1">
         <AnimatePresence custom={exitDir}>
           {visible.map((item, i) => (
             <SwipeCard
