@@ -47,7 +47,7 @@ export async function ensureBots(): Promise<Profile[]> {
   return out;
 }
 
-// Lines for every featured demo character (the one created above plus Sam and Jensen, who are
+// Lines for every featured demo character (the one created above plus Sam, Jensen and Jet, who are
 // hardcoded in data/seed.ts). Keyed by handle. `openers` is how they start the chat after you
 // match; `replies` is how they answer you.
 const LINES: Record<string, { openers: string[]; replies: string[] }> = {
@@ -63,6 +63,16 @@ const LINES: Record<string, { openers: string[]; replies: string[] }> = {
       "Disrupting. Whatever it is, we're disrupting it.",
       "Deal. I'll bring the energy drinks and the slides.",
       "Say less. Pre-revenue, post-snacks.",
+    ],
+  },
+  "@jet_codes_horizontally": {
+    openers: ["Matched. I'm on the floor by the outlets, come find me.", "Do you code sitting up? Weird flex, but OK. Merge?"],
+    replies: [
+      "Bet. I'll do the backend lying down.",
+      "Bring a frontend and a second energy drink.",
+      "I'm horizontal but I'm listening.",
+      "We ship at 4am or we nap at 4am. No in between.",
+      "Rice plate on my left, your PR on my right. Let's go.",
     ],
   },
   "@jensen_more_gpus": {
