@@ -1,14 +1,34 @@
-// STUB (Liam's scaffold). Kailen replaces this with real scoring.
+// GET /api/discover?userId= -> { profile: Profile; compat: Compat }[]
+// Everyone except you and people you've already swiped on, best match first.
 import { NextResponse } from "next/server";
-import { getProfiles } from "@/lib/store";
+import { getProfiles, getSwipes } from "@/lib/store";
+import { score } from "@/lib/scoring";
+import { withSwipeLock } from "../swipes/_lock";
 
 export async function GET(req: Request) {
-  const userId = new URL(req.url).searchParams.get("userId");
-  const profiles = (await getProfiles()).filter((p) => p.id !== userId);
-  return NextResponse.json(
-    profiles.map((profile, i) => ({
-      profile,
-      compat: { score: 90 - i * 3, reasons: ["Stub compat: you both exist.", "Fixture data. Kailen is cooking."] },
-    })),
-  );
+  const userId = new URL(req.url).searchParams.get("userId")?.trim();
+  if (!userId) {
+    return NextResponse.json(
+      { error: "Missing ?userId=. We can't find your soulmates anonymously. Go make a profile, ghost." },
+      { status: 400 },
+    );
+  }
+
+  // Read under the swipe lock so we never read db.json mid-write (see _lock.ts).
+  const [profiles, swipes] = await withSwipeLock(() => Promise.all([getProfiles(), getSwipes()]));
+  const me = profiles.find((p) => p.id === userId);
+  if (!me) {
+    return NextResponse.json(
+      { error: "No hacker with that id. Did someone rm -rf the database? Go make a profile." },
+      { status: 404 },
+    );
+  }
+
+  const swiped = new Set(swipes.filter((s) => s.fromId === userId).map((s) => s.toId));
+  const deck = profiles
+    .filter((p) => p.id !== userId && !swiped.has(p.id))
+    .map((profile) => ({ profile, compat: score(me, profile) }))
+    // Stable tiebreak on id so the deck order doesn't shuffle between refreshes.
+    .sort((x, y) => y.compat.score - x.compat.score || x.profile.id.localeCompare(y.profile.id));
+  return NextResponse.json(deck);
 }
