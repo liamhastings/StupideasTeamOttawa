@@ -26,7 +26,8 @@ Never commit directly to main except Liam's Step 0 scaffold. Commit small, push 
       name: string
       handle: string            // Discord/Telegram etc., only revealed after match
       avatarEmoji: string
-      avatarUrl?: string        // optional uploaded photo (small JPEG data URL). Render via ProfileCard or its exported <Avatar>, which falls back to the emoji.
+      avatarUrl?: string        // small round avatar (usually photos[0]). Render via components/ui/Avatar, which falls back to initials.
+      photos?: string[]         // up to 3 big Hinge-style pictures; ProfileCard shows them full-width between prompts.
       tagline: string
       bio: string
       styleTags: string[]       // from lib/tags.ts STYLE_TAGS

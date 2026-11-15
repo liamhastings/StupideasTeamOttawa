@@ -1,19 +1,31 @@
 import type { Profile } from "../lib/types";
-import { avatar, SKIN } from "./avatars";
+import { avatar, SKIN, type AvatarSpec } from "./avatars";
 
 // ─── HOW TO ADD / EDIT A DEMO HACKER ─────────────────────────────────────────
 // 1. Put their photo in public/avatars/ (square, under ~300 KB), e.g. mia.jpg
-// 2. Copy a profile below and edit it. Use  avatarUrl: photo("mia.jpg")
-//    (or keep the drawn avatar({...}) one, or delete avatarUrl to use the emoji).
+// 2. Copy a profile below and edit it. Swap its  ...pics({...})  line for
+//      ...mine("mia-1.jpg", "mia-2.jpg"),
+//    (first photo = avatar; 2-3 photos look best on the card).
 // 3. Keep the id starting with "seed_" and unique (seed_11, seed_12, ...).
 // 4. styleTags / skillTags / lookingFor must be copied exactly from lib/tags.ts,
 //    otherwise matching can't score them.
-// 5. prompts: up to 3. handle is what a match gets to see.
+// 5. prompts: 3 of them, Hinge-style; they sit between the photos. handle is what a match gets to see.
 // Save and refresh: the dev server picks it up, no database reset needed.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** A photo you dropped into public/avatars/. */
 const photo = (file: string) => `/avatars/${file}`;
+
+/** Your own photos: avatar is the first one. Use as  ...mine("a.jpg", "b.jpg") */
+const mine = (...files: string[]) => ({ avatarUrl: photo(files[0]), photos: files.map(photo) });
+
+/** Two drawn pictures: a portrait, then an "at the hackathon" laptop shot. */
+const pics = (spec: AvatarSpec, actionBg: string) => {
+  return {
+    avatarUrl: avatar(spec),
+    photos: [avatar(spec, "portrait"), avatar({ ...spec, bg: actionBg, laptop: true, prop: undefined }, "portrait")],
+  };
+};
 
 // 10 demo hackers with illustrated profile pictures. Ids must keep the "seed_"
 // prefix (the store refreshes them from this file; Kailen's demo rigging only
@@ -28,7 +40,7 @@ export const SEED_PROFILES: Profile[] = [
     name: "Dev 'sudo' Patel",
     handle: "@sudo_dev",
     avatarEmoji: "🐧",
-    avatarUrl: avatar({ bg: "#7aa2ff", skin: SKIN.tan, hair: "beanie", hairColor: "#22252f", shirt: "#2b3042", glasses: "square", mouth: "smirk", prop: "🐧" }),
+    ...pics({ bg: "#7aa2ff", skin: SKIN.tan, hair: "beanie", hairColor: "#22252f", shirt: "#2b3042", glasses: "square", mouth: "smirk", prop: "🐧" }, "#ffe14d"),
     tagline: "I use Arch btw. You didn't ask. I'm telling you anyway.",
     bio: "Has reinstalled his OS 14 times this semester for fun. Thinks a GUI is a crutch. Will make your deploy pipeline beautiful and your frontend a terminal.",
     styleTags: ["Arch btw", "Linux god", "mechanical keyboard cultist", "dark mode only"],
@@ -38,6 +50,7 @@ export const SEED_PROFILES: Profile[] = [
     prompts: [
       { question: "My hot take is…", answer: "GUIs are a social construct." },
       { question: "You should match with me if…", answer: "you can make my terminal look pretty for the judges." },
+      { question: "I will mass-refactor your code if…", answer: "you name a variable 'data2_final'." },
     ],
     createdAt: T,
   },
@@ -46,7 +59,7 @@ export const SEED_PROFILES: Profile[] = [
     name: "Mia Matcha",
     handle: "@matchamia",
     avatarEmoji: "🧋",
-    avatarUrl: avatar({ bg: "#3ddc97", skin: SKIN.light, hair: "bun", hairColor: "#6b3e26", shirt: "#f2f4fb", mouth: "smile", blush: true, prop: "🍵" }),
+    ...pics({ bg: "#3ddc97", skin: SKIN.light, hair: "bun", hairColor: "#6b3e26", shirt: "#f2f4fb", mouth: "smile", blush: true, prop: "🍵" }, "#ff9ecf"),
     tagline: "Matcha first. Merge conflicts later.",
     bio: "Product designer who judges your font choices silently, then loudly. Can turn a cursed wireframe into something a VC would frame. Brings her own whisk.",
     styleTags: ["matcha enjoyer", "light mode psychopath", "organized chaos"],
@@ -65,7 +78,7 @@ export const SEED_PROFILES: Profile[] = [
     name: "Big Mike Okafor",
     handle: "@bigmike_pitches",
     avatarEmoji: "🎤",
-    avatarUrl: avatar({ bg: "#ffe14d", skin: SKIN.deep, hair: "buzz", hairColor: "#141217", shirt: "#ff5a3c", mouth: "grin", beard: true, prop: "🎤" }),
+    ...pics({ bg: "#ffe14d", skin: SKIN.deep, hair: "buzz", hairColor: "#141217", shirt: "#ff5a3c", mouth: "grin", beard: true, prop: "🎤" }, "#7aa2ff"),
     tagline: "I can sell a to-do app to a monk.",
     bio: "Has never written a line of code. Has won 4 hackathons. Owns a blazer specifically for demo day. Will make your half-working prototype sound like Series A.",
     styleTags: ["demo-day gambler", "chaotic good", "pizza-fueled"],
@@ -75,6 +88,7 @@ export const SEED_PROFILES: Profile[] = [
     prompts: [
       { question: "I'm 100% sure we'll win because…", answer: "I talk for 3 minutes and the judges forget to ask questions." },
       { question: "Don't ask me about…", answer: "what the app actually does." },
+      { question: "You should match with me if…", answer: "your demo works and you need someone to make it sound like it cures cancer." },
     ],
     createdAt: T,
   },
@@ -83,7 +97,7 @@ export const SEED_PROFILES: Profile[] = [
     name: "Priya 'Prod' Nair",
     handle: "@prod_priya",
     avatarEmoji: "🔥",
-    avatarUrl: avatar({ bg: "#ff5a3c", skin: SKIN.medium, hair: "long", hairColor: "#1b1416", shirt: "#12141c", mouth: "smirk", prop: "🔥" }),
+    ...pics({ bg: "#ff5a3c", skin: SKIN.medium, hair: "long", hairColor: "#1b1416", shirt: "#12141c", mouth: "smirk", prop: "🔥" }, "#3ddc97"),
     tagline: "I deployed on Friday. Again. On purpose.",
     bio: "Full-stack goblin who ships before understanding. Database, API, frontend, all held together with TypeScript and spite. Commits at 4am, apologizes never.",
     styleTags: ["ships on vibes", "git push --force enjoyer", "commits at 4am"],
@@ -93,6 +107,7 @@ export const SEED_PROFILES: Profile[] = [
     prompts: [
       { question: "My most cursed commit message is…", answer: "fix fix fix FINAL final v2 (real)" },
       { question: "At 3am you'll find me…", answer: "in production. Hi." },
+      { question: "I will mass-refactor your code if…", answer: "I see a 400-line useEffect." },
     ],
     createdAt: T,
   },
@@ -101,7 +116,7 @@ export const SEED_PROFILES: Profile[] = [
     name: "Luna Lovelace",
     handle: "@luna_ml",
     avatarEmoji: "🤖",
-    avatarUrl: avatar({ bg: "#c49bff", skin: SKIN.brown, hair: "curly", hairColor: "#24160f", shirt: "#ffe14d", glasses: "round", mouth: "smile", prop: "🤖" }),
+    ...pics({ bg: "#c49bff", skin: SKIN.brown, hair: "curly", hairColor: "#24160f", shirt: "#ffe14d", glasses: "round", mouth: "smile", prop: "🤖" }, "#ffb347"),
     tagline: "I fine-tune models and my coping mechanisms.",
     bio: "ML engineer. Her model is 99% accurate on the training set and vibes on the test set. Can bolt AI onto anything, including things that should not have AI.",
     styleTags: ["ChatGPT whisperer", "cold-brew dependent", "works best at 3am"],
@@ -111,6 +126,7 @@ export const SEED_PROFILES: Profile[] = [
     prompts: [
       { question: "My hot take is…", answer: "every app is a wrapper. Mine is a wrapper with vibes." },
       { question: "Don't ask me about…", answer: "the test set." },
+      { question: "You should match with me if…", answer: "you want AI in it. Whatever 'it' is. I will put AI in it." },
     ],
     createdAt: T,
   },
@@ -119,7 +135,7 @@ export const SEED_PROFILES: Profile[] = [
     name: "Sam 'Solder' Kowalski",
     handle: "@solder_sam",
     avatarEmoji: "🔌",
-    avatarUrl: avatar({ bg: "#ffb347", skin: SKIN.fair, hair: "bald", hairColor: "#a0522d", shirt: "#3b4a6b", eyes: "sleepy", mouth: "flat", beard: true, prop: "🔌" }),
+    ...pics({ bg: "#ffb347", skin: SKIN.fair, hair: "bald", hairColor: "#a0522d", shirt: "#3b4a6b", eyes: "sleepy", mouth: "flat", beard: true, prop: "🔌" }, "#6ee7e0"),
     tagline: "Hardware hacker. Smells faintly of flux.",
     bio: "Brings an oscilloscope to every hackathon. Nobody knows why. Can make anything blink, beep or catch fire. Has slept under 6 different venue desks.",
     styleTags: ["sleeps under the desk", "stickers on laptop: 47", "snack hoarder"],
@@ -129,6 +145,7 @@ export const SEED_PROFILES: Profile[] = [
     prompts: [
       { question: "At 3am you'll find me…", answer: "soldering something that did not need to exist." },
       { question: "You should match with me if…", answer: "you need a blinking LED. Everyone needs a blinking LED." },
+      { question: "My hot take is…", answer: "software is just hardware that gave up." },
     ],
     createdAt: T,
   },
@@ -137,7 +154,7 @@ export const SEED_PROFILES: Profile[] = [
     name: "Zoe 'div' Tremblay",
     handle: "@zoe_centers_divs",
     avatarEmoji: "💅",
-    avatarUrl: avatar({ bg: "#6ee7e0", skin: SKIN.light, hair: "spiky", hairColor: "#ff4fa3", shirt: "#12141c", eyes: "wink", mouth: "grin", prop: "💅" }),
+    ...pics({ bg: "#6ee7e0", skin: SKIN.light, hair: "spiky", hairColor: "#ff4fa3", shirt: "#12141c", eyes: "wink", mouth: "grin", prop: "💅" }, "#c49bff"),
     tagline: "I can center a div. First try. No Stack Overflow.",
     bio: "Frontend wizard. Animations so smooth you'll forget the app does nothing. Ships iOS and web from the same codebase and the same energy drink.",
     styleTags: ["emoji in commit messages", "energy drink IV drip", "meme-driven development"],
@@ -147,6 +164,7 @@ export const SEED_PROFILES: Profile[] = [
     prompts: [
       { question: "I'm overly proud of…", answer: "a pure-CSS hamburger menu with a hover state." },
       { question: "My biggest red flag is…", answer: "I use !important recreationally." },
+      { question: "You should match with me if…", answer: "you write APIs and never, ever touch my CSS." },
     ],
     createdAt: T,
   },
@@ -155,7 +173,7 @@ export const SEED_PROFILES: Profile[] = [
     name: "Tobias 'Hello World' Lee",
     handle: "@tobi_first_hack",
     avatarEmoji: "🌱",
-    avatarUrl: avatar({ bg: "#ff9ecf", skin: SKIN.fair, hair: "short", hairColor: "#141217", shirt: "#3ddc97", mouth: "grin", blush: true, prop: "🌱" }),
+    ...pics({ bg: "#ff9ecf", skin: SKIN.fair, hair: "short", hairColor: "#141217", shirt: "#3ddc97", mouth: "grin", blush: true, prop: "🌱" }, "#ffd6a5"),
     tagline: "First hackathon. Please be gentle. Or don't, I'm here to learn.",
     bio: "Eager newbie who read the docs. All of them. Writes Python, writes jokes, writes the README nobody else will. Will make coffee runs without being asked.",
     styleTags: ["reads the docs (rare)", "touches grass (allegedly)", "pizza-fueled"],
@@ -165,6 +183,7 @@ export const SEED_PROFILES: Profile[] = [
     prompts: [
       { question: "I'm overly proud of…", answer: "a calculator that works. Mostly." },
       { question: "You should match with me if…", answer: "you want someone who will laugh at your variable names." },
+      { question: "My biggest red flag is…", answer: "I ask 'but why?' about everything. Including git." },
     ],
     createdAt: T,
   },
@@ -173,7 +192,7 @@ export const SEED_PROFILES: Profile[] = [
     name: "Noor Null",
     handle: "@null_pointer_noor",
     avatarEmoji: "💀",
-    avatarUrl: avatar({ bg: "#2b3042", skin: SKIN.medium, hair: "long", hairColor: "#7a2e1f", shirt: "#12141c", headphones: "#3ddc97", mouth: "flat", prop: "💀" }),
+    ...pics({ bg: "#2b3042", skin: SKIN.medium, hair: "long", hairColor: "#7a2e1f", shirt: "#12141c", headphones: "#3ddc97", mouth: "flat", prop: "💀" }, "#ff5a3c"),
     tagline: "Security researcher. I already found 3 bugs in your demo.",
     bio: "Pwned the hackathon's own check-in site before lunch (responsibly disclosed, after lunch). Writes Rust, deploys infra, trusts no one, especially your .env file.",
     styleTags: ["headphones permanently on", "dark mode only", "no sleep, only deploy"],
@@ -183,6 +202,7 @@ export const SEED_PROFILES: Profile[] = [
     prompts: [
       { question: "The way to my heart is…", answer: "a responsible disclosure and a hoodie." },
       { question: "Don't ask me about…", answer: "the judges' wifi password. I know it." },
+      { question: "I will mass-refactor your code if…", answer: "I find a password in it. I will find a password in it." },
     ],
     createdAt: T,
   },
@@ -191,7 +211,7 @@ export const SEED_PROFILES: Profile[] = [
     name: "Ada 'Agile' Chen",
     handle: "@ada_standup",
     avatarEmoji: "📋",
-    avatarUrl: avatar({ bg: "#ffd6a5", skin: SKIN.light, hair: "short", hairColor: "#2a1d1a", shirt: "#7aa2ff", glasses: "square", mouth: "smile", prop: "📋" }),
+    ...pics({ bg: "#ffd6a5", skin: SKIN.light, hair: "short", hairColor: "#2a1d1a", shirt: "#7aa2ff", glasses: "square", mouth: "smile", prop: "📋" }, "#c49bff"),
     tagline: "Let's sync. Offline. Asynchronously. In 5.",
     bio: "Project manager who once ran a standup at 2am. Everyone cried. Everyone shipped. Also cuts the demo video and builds the deck while the devs argue about tabs.",
     styleTags: ["plans everything, builds nothing", "organized chaos", "lawful pedantic"],
@@ -201,6 +221,7 @@ export const SEED_PROFILES: Profile[] = [
     prompts: [
       { question: "My hot take is…", answer: "a Jira board at a hackathon is a power move." },
       { question: "You should match with me if…", answer: "you need someone to say 'blocker' with confidence." },
+      { question: "My biggest red flag is…", answer: "I will make a Gantt chart for a 36-hour hackathon." },
     ],
     createdAt: T,
   },

@@ -26,15 +26,22 @@ export function validateProfileInput(
     .filter((p) => p.question && p.answer)
     .slice(0, 3);
   const count = Number(b.hackathonCount);
-  // Photos arrive as small data URLs (resized client-side). Cap at ~400KB.
+  // Photos arrive as data URLs, resized client-side. Seed profiles skip this (they
+  // can use /avatars/ paths); user input must be real image data.
+  const isImage = (v: unknown): v is string => typeof v === "string" && /^data:image\/(png|jpeg|webp|gif);base64,/.test(v);
+  const rawPhotos = Array.isArray(b.photos) ? b.photos.filter(Boolean).slice(0, 3) : [];
+  if (rawPhotos.some((x) => !isImage(x)))
+    return { ok: false, error: "That's not an image. That's a cry for help." };
+  if ((rawPhotos as string[]).some((x) => x.length > 700_000))
+    return { ok: false, error: "Photo too big. We're a JSON file, not Instagram." };
+  const photos = rawPhotos as string[];
   let avatarUrl: string | undefined;
   if (typeof b.avatarUrl === "string" && b.avatarUrl) {
-    if (!/^data:image\/(png|jpeg|webp|gif);base64,/.test(b.avatarUrl))
-      return { ok: false, error: "That's not an image. That's a cry for help." };
-    if (b.avatarUrl.length > 400_000)
-      return { ok: false, error: "Photo too big. We're a JSON file, not Instagram." };
+    if (!isImage(b.avatarUrl)) return { ok: false, error: "That's not an image. That's a cry for help." };
+    if (b.avatarUrl.length > 700_000) return { ok: false, error: "Photo too big. We're a JSON file, not Instagram." };
     avatarUrl = b.avatarUrl;
   }
+  avatarUrl ??= photos[0];
   return {
     ok: true,
     value: {
@@ -42,6 +49,7 @@ export function validateProfileInput(
       handle,
       avatarEmoji: str(b.avatarEmoji, 8),
       avatarUrl,
+      photos,
       tagline: str(b.tagline, 120),
       bio: str(b.bio, 400),
       styleTags: strArr(b.styleTags, 12),

@@ -31,15 +31,18 @@ function withFreshSeeds(db: DB): DB {
 }
 
 async function readDB(): Promise<DB> {
-  if (g[KEY]) return g[KEY];
-  let db: DB;
-  try {
-    const raw = await fs.readFile(DB_PATH, "utf8");
-    db = withFreshSeeds(JSON.parse(raw) as DB);
-  } catch {
-    db = { profiles: [...SEED_PROFILES], swipes: [], matches: [] };
+  if (!g[KEY]) {
+    let db: DB;
+    try {
+      db = JSON.parse(await fs.readFile(DB_PATH, "utf8")) as DB;
+    } catch {
+      db = { profiles: [], swipes: [], matches: [] };
+    }
+    g[KEY] ??= db; // another request may have loaded it while we awaited
   }
-  g[KEY] ??= db; // another request may have loaded it while we awaited
+  // Re-apply data/seed.ts on every read so seed edits show up after a save, even
+  // though the cache outlives hot reloads. 10 profiles, so this is free.
+  g[KEY] = withFreshSeeds(g[KEY]);
   return g[KEY];
 }
 

@@ -17,6 +17,7 @@ export interface AvatarSpec {
   blush?: boolean;
   beard?: boolean;
   prop?: string; // emoji sticker in the corner
+  laptop?: boolean; // "action shot": sticker-covered laptop lid in the foreground
 }
 
 export const SKIN = {
@@ -90,9 +91,11 @@ function glasses(s: AvatarSpec) {
   return "";
 }
 
-export function avatar(s: AvatarSpec): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-<rect width="200" height="200" fill="${s.bg}"/>
+/** shape "square" for round avatars, "portrait" (4:5) for the big Hinge-style photos. */
+export function avatar(s: AvatarSpec, shape: "square" | "portrait" = "square"): string {
+  const box = shape === "portrait" ? `viewBox="10 -25 180 225" width="720" height="900"` : `viewBox="0 0 200 200" width="400" height="400"`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" ${box}>
+<rect x="-50" y="-50" width="300" height="300" fill="${s.bg}"/>
 <circle cx="100" cy="100" r="78" fill="#fff" fill-opacity=".14"/>
 ${hairBack(s)}
 <path d="M28 200C28 154 60 134 100 134C140 134 172 154 172 200Z" fill="${s.shirt}"/>
@@ -110,6 +113,7 @@ ${mouth(s)}
 ${glasses(s)}
 ${hairFront(s)}
 ${s.headphones ? `<path d="M56 98C52 34 148 34 144 98" fill="none" stroke="${s.headphones}" stroke-width="8" stroke-linecap="round"/><rect x="47" y="86" width="16" height="28" rx="7" fill="${s.headphones}"/><rect x="137" y="86" width="16" height="28" rx="7" fill="${s.headphones}"/>` : ""}
+${s.laptop ? `<rect x="34" y="148" width="132" height="70" rx="8" fill="#d9dde8"/><rect x="34" y="148" width="132" height="70" rx="8" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="2"/><circle cx="100" cy="176" r="9" fill="#fff" opacity=".9"/><rect x="50" y="160" width="22" height="14" rx="3" fill="#ffe14d" transform="rotate(-10 61 167)"/><circle cx="140" cy="168" r="9" fill="#ff5a3c"/><rect x="118" y="186" width="30" height="10" rx="5" fill="#7aa2ff"/><rect x="54" y="188" width="18" height="18" rx="4" fill="#3ddc97" transform="rotate(12 63 197)"/>` : ""}
 ${s.prop ? `<circle cx="160" cy="162" r="25" fill="#fff" stroke="#000" stroke-opacity=".1" stroke-width="2"/><text x="160" y="172" font-size="28" text-anchor="middle">${s.prop}</text>` : ""}
 </svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg.replace(/\n/g, ""))}`;
