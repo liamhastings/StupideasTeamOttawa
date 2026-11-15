@@ -3,7 +3,7 @@
 // Idempotent: addSwipe upserts per (from,to) and addMatch dedupes pairs; the lock
 // stops a double-click race from slipping two matches in.
 import { NextResponse } from "next/server";
-import { addMatch, addSwipe, getProfiles, getSwipes } from "@/lib/store";
+import { addMatch, addSwipe, getMatches, getProfiles, getSwipes } from "@/lib/store";
 import { score } from "@/lib/scoring";
 import type { Swipe } from "@/lib/types";
 import { withSwipeLock } from "./_lock";
@@ -32,22 +32,33 @@ export async function POST(req: Request) {
   const swipe: Swipe = { fromId, toId, action: b.action };
 
   return withSwipeLock(async () => {
-    const profiles = await getProfiles();
-    const me = profiles.find((p) => p.id === fromId);
-    const them = profiles.find((p) => p.id === toId);
-    if (!me) return bad("No hacker with that fromId. Did someone rm -rf the database? Go make a profile.", 404);
-    if (!them) return bad("That hacker doesn't exist. They've been garbage collected.", 404);
+    try {
+      const profiles = await getProfiles();
+      const me = profiles.find((p) => p.id === fromId);
+      const them = profiles.find((p) => p.id === toId);
+      if (!me) return bad("No hacker with that fromId. Did someone rm -rf the database? Go make a profile.", 404);
+      if (!them) return bad("That hacker doesn't exist. They've been garbage collected.", 404);
 
-    await addSwipe(swipe);
-    if (swipe.action !== "like") return NextResponse.json({ matched: false });
+      await addSwipe(swipe);
+      if (swipe.action !== "like") return NextResponse.json({ matched: false });
 
-    const swipes = await getSwipes();
-    const likedBack = swipes.some((s) => s.fromId === toId && s.toId === fromId && s.action === "like");
-    if (!likedBack) return NextResponse.json({ matched: false });
+      // A match that already exists wins (e.g. someone passed after matching): keep the
+      // swipe response consistent with what /api/matches shows.
+      const existing = (await getMatches()).find(
+        (m) => (m.userAId === fromId && m.userBId === toId) || (m.userAId === toId && m.userBId === fromId),
+      );
+      if (existing) return NextResponse.json({ matched: true, match: existing });
 
-    // Symmetric score for the match record: average of both viewpoints.
-    const matchScore = Math.round((score(me, them).score + score(them, me).score) / 2);
-    const match = await addMatch({ userAId: fromId, userBId: toId, score: matchScore });
-    return NextResponse.json({ matched: true, match });
+      const swipes = await getSwipes();
+      const likedBack = swipes.some((s) => s.fromId === toId && s.toId === fromId && s.action === "like");
+      if (!likedBack) return NextResponse.json({ matched: false });
+
+      // Symmetric score for the match record: average of both viewpoints.
+      const matchScore = Math.round((score(me, them).score + score(them, me).score) / 2);
+      const match = await addMatch({ userAId: fromId, userBId: toId, score: matchScore });
+      return NextResponse.json({ matched: true, match });
+    } catch {
+      return bad("The swipe server tripped over its own shoelaces. Try again in a sec.", 500);
+    }
   });
 }
