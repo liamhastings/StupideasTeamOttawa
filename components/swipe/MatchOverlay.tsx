@@ -3,6 +3,7 @@
 import { animate, motion, useIsPresent, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { initials } from "@/components/ui/Avatar";
 import { sweatLevel } from "@/lib/scoring";
 import type { Match } from "@/lib/types";
 import type { DeckItem } from "./types";
@@ -13,7 +14,7 @@ export interface MatchOverlayProps {
   /** The match record (for the chat link). */
   match: Match;
   /** Your own avatar/name for the left side of the collision. */
-  me: { avatarEmoji: string; name: string };
+  me: { name: string; avatarUrl?: string };
   /** "Keep swiping". Also fired by Escape and by clicking the backdrop. */
   onClose: () => void;
 }
@@ -40,7 +41,7 @@ function makeConfetti() {
 const firstName = (n: string) => n.trim().split(/\s+/).find((w) => !/^(dr|mr|mrs|ms|prof)\.?$/i.test(w)) ?? "";
 const meter = (n: number) => "#".repeat(n) + "-".repeat(10 - n);
 
-function Hacker({ emoji, label, from }: { emoji: string; label: string; from: number }) {
+function Hacker({ name, avatarUrl, from }: { name: string; avatarUrl?: string; from: number }) {
   return (
     <motion.div
       initial={{ x: from, opacity: 0 }}
@@ -48,10 +49,15 @@ function Hacker({ emoji, label, from }: { emoji: string; label: string; from: nu
       transition={{ type: "spring", stiffness: 160, damping: 14, delay: 0.15 }}
       className="flex flex-col items-center gap-2"
     >
-      <div className="grid h-20 w-20 place-items-center border-2 border-[#111] bg-white text-4xl shadow-[4px_4px_0_#111]">
-        {emoji}
+      <div className="grid h-20 w-20 place-items-center overflow-hidden border-2 border-[#111] bg-white font-mono text-2xl font-black text-[#111] shadow-[4px_4px_0_#111]">
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+        ) : (
+          initials(name)
+        )}
       </div>
-      <span className="max-w-[7rem] truncate font-mono text-xs font-bold text-[#111]">{label}</span>
+      <span className="max-w-[7rem] truncate font-mono text-xs font-bold text-[#111]">{name}</span>
     </motion.div>
   );
 }
@@ -172,7 +178,7 @@ export default function MatchOverlay({ item, match, me, onClose }: MatchOverlayP
         </p>
 
         <div className="flex items-center gap-3">
-          <Hacker emoji={me.avatarEmoji} label={me.name} from={-160} />
+          <Hacker name={me.name} avatarUrl={me.avatarUrl} from={-160} />
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -182,7 +188,7 @@ export default function MatchOverlay({ item, match, me, onClose }: MatchOverlayP
           >
             &lt;=&gt;
           </motion.span>
-          <Hacker emoji={profile.avatarEmoji} label={profile.name} from={160} />
+          <Hacker name={profile.name} avatarUrl={profile.avatarUrl} from={160} />
         </div>
 
         {/* One boxed readout: how well you fit, how cracked they are, why. */}

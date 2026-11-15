@@ -1,6 +1,7 @@
 "use client";
 import Countdown from "@/components/layout/Countdown";
 import Logo from "@/components/layout/Logo";
+import Avatar from "@/components/ui/Avatar";
 import BadgeTile from "@/components/ui/BadgeTile";
 import Button from "@/components/ui/Button";
 import { useUserId } from "./matches/_lib/useUserId";
@@ -9,19 +10,16 @@ const sample = [
   {
     id: "l1",
     name: "Dev 'sudo' Patel",
-    avatarEmoji: "🐧",
     tagline: "I use Arch btw. Please don't ask.",
   },
   {
     id: "l2",
     name: "Priya",
-    avatarEmoji: "🧋",
     tagline: "Figma sorceress. 7 hackathons deep.",
   },
   {
     id: "l3",
     name: "Sam",
-    avatarEmoji: "🎤",
     tagline: "Can pitch a to-do app to a monk.",
   },
 ];
@@ -38,21 +36,18 @@ const log = [
 const reviews = [
   {
     who: "Maya",
-    e: "🎨",
     verdict: "Approved",
     good: true,
     q: "Found my soulmate designer in 4 swipes.",
   },
   {
     who: "Dev",
-    e: "🐧",
     verdict: "Approved",
     good: true,
     q: "I finally made a friend.",
   },
   {
     who: "Jo",
-    e: "🧋",
     verdict: "Changes requested",
     good: false,
     q: "No one wanted to pair me with. Chat, am I chopped?",
@@ -138,12 +133,7 @@ export default function Landing() {
         <ul className="mt-8 divide-y divide-edge border-y border-edge">
           {reviews.map((r) => (
             <li key={r.who} className="flex gap-4 py-5">
-              <span
-                className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-slab text-xl"
-                aria-hidden
-              >
-                {r.e}
-              </span>
+              <Avatar profile={{ name: r.who }} size={40} />
               <div>
                 <p className="flex flex-wrap items-center gap-x-3 text-sm">
                   <b>{r.who}</b>

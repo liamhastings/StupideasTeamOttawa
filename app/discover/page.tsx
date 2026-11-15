@@ -33,8 +33,8 @@ export default function DiscoverPage() {
   const { push: toast } = useToast();
   // Matches waiting to be celebrated. A queue, so two quick matches each get their moment.
   const [matchQueue, setMatchQueue] = useState<{ item: DeckItem; match: Match }[]>([]);
-  // Your own avatar for the overlay. Cosmetic: falls back to a generic hacker if the fetch fails.
-  const [me, setMe] = useState({ avatarEmoji: "🧑‍💻", name: "You" });
+  // Your own name and photo for the overlay. Cosmetic: falls back to initials if the fetch fails.
+  const [me, setMe] = useState<{ name: string; avatarUrl?: string }>({ name: "You" });
 
   const load = useCallback(
     async (uid: string, demo: boolean) => {
@@ -47,15 +47,15 @@ export default function DiscoverPage() {
             body: JSON.stringify({ userId: uid, count: 3 }),
           });
           const rigBody = (await readJson(rig)) as { message?: string } | null;
-          if (rig.ok && rigBody?.message) toast(`🎲 Demo mode: ${rigBody.message}`);
+          if (rig.ok && rigBody?.message) toast(`Demo mode: ${rigBody.message}`);
         }
         const [res, meRes] = await Promise.all([
           fetch(`/api/discover?userId=${encodeURIComponent(uid)}`, { cache: "no-store" }),
           fetch(`/api/profiles/${encodeURIComponent(uid)}`, { cache: "no-store" }).catch(() => null),
         ]);
         const body = await readJson(res);
-        const meBody = meRes?.ok ? ((await readJson(meRes)) as { avatarEmoji?: string; name?: string } | null) : null;
-        if (meBody?.avatarEmoji) setMe({ avatarEmoji: meBody.avatarEmoji, name: meBody.name || "You" });
+        const meBody = meRes?.ok ? ((await readJson(meRes)) as { avatarUrl?: string; name?: string } | null) : null;
+        if (meBody) setMe({ name: meBody.name || "You", avatarUrl: meBody.avatarUrl });
         if (res.status === 404) {
           // Stale id in localStorage (db got wiped). Start over.
           clearUserId();

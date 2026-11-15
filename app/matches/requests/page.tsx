@@ -15,12 +15,12 @@ export default function LikesPage() {
   const [items, setItems] = useState<LikeItem[] | null>(null);
   const [open, setOpen] = useState<LikeItem | null>(null);
   const [matched, setMatched] = useState<{ item: LikeItem; matchId?: string } | null>(null);
-  const [meEmoji, setMeEmoji] = useState("🫵");
+  const [me, setMe] = useState<{ name?: string; avatarUrl?: string }>({});
 
   useEffect(() => {
     if (!userId) return;
     fetchLikes(userId).then(setItems);
-    fetchProfile(userId).then((p) => p && setMeEmoji(p.avatarEmoji));
+    fetchProfile(userId).then((p) => p && setMe({ name: p.name, avatarUrl: p.avatarUrl }));
   }, [userId]);
 
   async function respond(item: LikeItem, action: "like" | "pass") {
@@ -71,8 +71,8 @@ export default function LikesPage() {
       <MatchModal
         open={!!matched}
         onClose={() => setMatched(null)}
-        meEmoji={meEmoji}
-        otherEmoji={matched?.item.profile.avatarEmoji ?? "🤝"}
+        me={me}
+        other={matched?.item.profile ?? {}}
         otherName={matched?.item.profile.name ?? ""}
         chatHref={matched?.matchId ? `/matches/${matched.matchId}/chat` : "/matches"}
       />

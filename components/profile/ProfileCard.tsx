@@ -1,5 +1,6 @@
 import type { Compat, Profile } from "@/lib/types";
 import { bandFor } from "@/components/ui/BadgeTile";
+import UiAvatar from "@/components/ui/Avatar";
 
 export interface ProfileCardProps {
   profile: Profile;
@@ -12,27 +13,6 @@ function hackathonLabel(n: number) {
   if (n === 1) return "1 hackathon";
   if (n < 10) return `${n} hackathons`;
   return `${n} hackathons. Send help.`;
-}
-
-/** Uploaded photo if there is one, otherwise the emoji. Exported for teammates. */
-export function Avatar({
-  profile,
-  className = "",
-}: {
-  profile: Pick<Profile, "avatarEmoji" | "avatarUrl" | "name">;
-  className?: string;
-}) {
-  if (profile.avatarUrl) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={profile.avatarUrl} alt={profile.name} className={`shrink-0 rounded-full object-cover ${className}`} />
-    );
-  }
-  return (
-    <span aria-hidden className={`grid shrink-0 place-items-center rounded-full ${className}`}>
-      {profile.avatarEmoji}
-    </span>
-  );
 }
 
 /** Fit score as a laptop sticker, same as Ian's BadgeTile. */
@@ -67,7 +47,7 @@ export default function ProfileCard({ profile, compat, compact }: ProfileCardPro
   if (compact) {
     return (
       <div className="flex items-center gap-3 rounded-2xl border border-edge bg-slab p-3 text-snow">
-        <Avatar profile={profile} className="h-12 w-12 bg-floor text-2xl" />
+        <UiAvatar profile={profile} size={48} className="bg-floor" />
         <div className="min-w-0 flex-1">
           <div className="truncate font-display text-sm font-bold">{profile.name}</div>
           <div className="truncate text-sm text-dim">{profile.tagline}</div>
@@ -87,7 +67,7 @@ export default function ProfileCard({ profile, compat, compact }: ProfileCardPro
           <span className="block text-xs font-semibold">my name is</span>
         </div>
         <div className="flex items-center gap-4 px-5 py-5">
-          <Avatar profile={profile} className="h-20 w-20 border-2 border-ink/10 bg-white text-5xl" />
+          <UiAvatar profile={profile} size={80} className="border-2 border-ink/10 !bg-white !text-ink" />
           <div className="min-w-0 flex-1">
             <h2 className="font-display text-2xl font-black leading-tight">{profile.name}</h2>
             {profile.tagline && <p className="mt-1 text-sm leading-snug text-ink/70">{profile.tagline}</p>}

@@ -14,7 +14,7 @@ const BOTS: Bot[] = [
     profile: {
       name: "Leather Jacket Larry",
       handle: "@leather_jacket_larry",
-      avatarEmoji: "🧥",
+      avatarEmoji: "",
       tagline: "The more you merge, the more you save.",
       bio: "Keynote veteran. Will announce your teammate in 4K at 120fps. Owns more GPUs than friends.",
       styleTags: ["demo-day gambler", "ships on vibes", "stickers on laptop: 47"],
@@ -38,7 +38,7 @@ const BOTS: Bot[] = [
     profile: {
       name: "Agent Sleeper",
       handle: "@agent_sleeper",
-      avatarEmoji: "🕵️",
+      avatarEmoji: "",
       tagline: "Definitely just here for the free pizza.",
       bio: "Wears a trench coat indoors. Asks very normal questions about your repo. Totally normal.",
       styleTags: ["pizza-fueled", "headphones permanently on", "works best at 3am"],

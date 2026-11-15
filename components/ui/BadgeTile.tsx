@@ -1,4 +1,5 @@
 import type { Profile } from "@/lib/types";
+import Avatar from "./Avatar";
 
 const BANDS = ["bg-hi", "bg-ship", "bg-ok", "bg-sky"];
 export function bandFor(id: string) {
@@ -8,7 +9,7 @@ export function bandFor(id: string) {
 }
 
 type Props = {
-  profile: Pick<Profile, "id" | "name" | "avatarEmoji" | "tagline">;
+  profile: Pick<Profile, "id" | "name" | "tagline"> & Partial<Pick<Profile, "avatarUrl">>;
   score?: number;
   tilt?: number;
   onClick?: () => void;
@@ -27,7 +28,7 @@ export default function BadgeTile({ profile, score, tilt, onClick, className = "
         <span className="block text-[11px] font-semibold">my name is</span>
       </span>
       <span className="block px-3 pb-4 pt-3">
-        <span className="block text-4xl" aria-hidden>{profile.avatarEmoji}</span>
+        <span className="mx-auto block w-fit"><Avatar profile={profile} size={56} /></span>
         <span className="mt-1 line-clamp-2 block font-display text-sm font-bold leading-tight">{profile.name}</span>
         <span className="mt-1 line-clamp-2 block text-xs text-ink/70">{profile.tagline}</span>
       </span>

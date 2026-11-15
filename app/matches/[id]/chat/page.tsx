@@ -60,7 +60,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
       <header className="flex items-center gap-3 border-b border-edge px-3 py-3">
         <Link href="/matches" aria-label="Back to matches" className="p-1 text-dim hover:text-snow"><BackIcon className="h-6 w-6" /></Link>
         <Link href={`/matches/${id}`} className="flex min-w-0 items-center gap-3">
-          <Avatar emoji={item?.other.avatarEmoji ?? "💬"} size={40} />
+          <Avatar profile={item?.other ?? { name: "Chat" }} size={40} />
           <span className="min-w-0">
             <b className="block truncate leading-tight">{item?.other.name ?? "Chat"}</b>
             <span className="block text-xs text-dim">Tap for profile and handle</span>

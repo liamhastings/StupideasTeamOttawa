@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import type { Profile } from "@/lib/types";
-import { AVATAR_EMOJIS, PROMPT_QUESTIONS, SKILL_TAGS, STYLE_TAGS } from "@/lib/tags";
+import { PROMPT_QUESTIONS, SKILL_TAGS, STYLE_TAGS } from "@/lib/tags";
+import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
 
 export type ProfileDraft = Omit<Profile, "id" | "createdAt">;
@@ -10,7 +11,7 @@ export type ProfileDraft = Omit<Profile, "id" | "createdAt">;
 export const EMPTY_DRAFT: ProfileDraft = {
   name: "",
   handle: "",
-  avatarEmoji: "🧑‍💻",
+  avatarEmoji: "",
   tagline: "",
   bio: "",
   styleTags: [],
@@ -21,7 +22,7 @@ export const EMPTY_DRAFT: ProfileDraft = {
 };
 
 const STEPS = [
-  { title: "Who are you, hacker?", sub: "Pick a face. Pick a name. Pretend it's not a cry for help." },
+  { title: "Who are you, hacker?", sub: "Add a photo. Pick a name. Pretend it's not a cry for help." },
   { title: "Your pitch", sub: "One line to hook them. One paragraph to ruin it." },
   { title: "Your vibe", sub: "How do you hack? Choose your fighter(s)." },
   { title: "Your skills", sub: "What can you actually do? We won't check. Probably." },
@@ -138,14 +139,7 @@ export default function ProfileForm({
   const sections: React.ReactNode[] = [
     <div key="0" className="space-y-6">
       <div className="flex items-center gap-4">
-        {d.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={d.avatarUrl} alt="Your photo" className="h-20 w-20 rounded-full object-cover ring-2 ring-hi ring-offset-2 ring-offset-floor" />
-        ) : (
-          <span className="grid h-20 w-20 place-items-center rounded-full bg-slab text-4xl ring-2 ring-hi ring-offset-2 ring-offset-floor">
-            {d.avatarEmoji}
-          </span>
-        )}
+        <Avatar profile={{ name: d.name, avatarUrl: d.avatarUrl }} size={80} ring />
         <div className="flex flex-col items-start gap-1">
           <label className="cursor-pointer rounded-full border border-edge px-4 py-2 text-sm font-bold transition hover:bg-slab">
             {d.avatarUrl ? "Change photo" : "Upload a photo"}
@@ -168,30 +162,13 @@ export default function ProfileForm({
           </label>
           {d.avatarUrl ? (
             <button type="button" onClick={() => set("avatarUrl", undefined)} className="px-1 text-xs text-dim underline-offset-2 hover:text-snow hover:underline">
-              Remove, use an emoji
+              Remove photo
             </button>
           ) : (
-            <span className="px-1 text-xs text-dim">or pick an emoji below. More on-brand.</span>
+            <span className="px-1 text-xs text-dim">Photos only. No photo, no problem: you get initials.</span>
           )}
         </div>
       </div>
-      {!d.avatarUrl && (
-        <div className="grid grid-cols-8 gap-1.5">
-          {AVATAR_EMOJIS.map((e) => (
-            <button
-              type="button"
-              key={e}
-              aria-pressed={d.avatarEmoji === e}
-              onClick={() => set("avatarEmoji", e)}
-              className={`grid aspect-square place-items-center rounded-xl text-2xl transition ${
-                d.avatarEmoji === e ? "bg-hi/20 ring-2 ring-hi" : "bg-slab hover:bg-edge"
-              }`}
-            >
-              {e}
-            </button>
-          ))}
-        </div>
-      )}
       <label className="block">
         <span className={labelCls}>Name</span>
         <input className={inputCls} placeholder="Your name or hacker alias" maxLength={60} value={d.name} onChange={(e) => set("name", e.target.value)} />
