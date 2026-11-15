@@ -178,7 +178,7 @@ export const SEED_PROFILES: Profile[] = [
   // ─── Featured cast ───
   {
     id: "seed_11",
-    name: "Sam",
+    name: "Sam Altman",
     handle: "@sam_ships_it",
     avatarEmoji: "",
     ...mine("sam01.jpg", "sam02.jpg"),
