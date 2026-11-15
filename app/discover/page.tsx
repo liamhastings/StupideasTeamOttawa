@@ -9,6 +9,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/swipe/States"
 import type { DeckItem, SwipeAction } from "@/components/swipe/types";
 import { clearUserId, getUserId } from "@/lib/session";
 import type { Match } from "@/lib/types";
+import { useToast } from "@/components/ui/Toast";
 
 type Phase = "loading" | "ready" | "error";
 
@@ -29,7 +30,7 @@ export default function DiscoverPage() {
   const [phase, setPhase] = useState<Phase>("loading");
   const [deck, setDeck] = useState<DeckItem[]>([]);
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState<string | null>(null);
+  const { push: toast } = useToast();
   // Matches waiting to be celebrated. A queue, so two quick matches each get their moment.
   const [matchQueue, setMatchQueue] = useState<{ item: DeckItem; match: Match }[]>([]);
   // Your own avatar for the overlay. Cosmetic: falls back to a generic hacker if the fetch fails.
@@ -46,7 +47,7 @@ export default function DiscoverPage() {
             body: JSON.stringify({ userId: uid, count: 3 }),
           });
           const rigBody = (await readJson(rig)) as { message?: string } | null;
-          if (rig.ok && rigBody?.message) setNotice(`🎲 Demo mode: ${rigBody.message}`);
+          if (rig.ok && rigBody?.message) toast(`🎲 Demo mode: ${rigBody.message}`);
         }
         const [res, meRes] = await Promise.all([
           fetch(`/api/discover?userId=${encodeURIComponent(uid)}`, { cache: "no-store" }),
@@ -69,7 +70,7 @@ export default function DiscoverPage() {
         setPhase("error");
       }
     },
-    [router],
+    [router, toast],
   );
 
   useEffect(() => {
@@ -99,7 +100,6 @@ export default function DiscoverPage() {
       if (!userId) return;
       // Optimistic: the card flies away now, the server catches up.
       setDeck((d) => d.filter((x) => x.profile.id !== item.profile.id));
-      setNotice(null);
       try {
         const res = await fetch("/api/swipes", {
           method: "POST",
@@ -114,7 +114,7 @@ export default function DiscoverPage() {
             router.replace("/onboarding");
           } else {
             // THEY don't exist anymore: the card stays gone, we stay signed in.
-            setNotice("That hacker got garbage collected before you could swipe. Next!");
+            toast("That hacker got garbage collected before you could swipe. Next!");
           }
           return;
         }
@@ -128,10 +128,10 @@ export default function DiscoverPage() {
       } catch (e) {
         // Put the card back so nobody gets silently ghosted.
         setDeck((d) => (d.some((x) => x.profile.id === item.profile.id) ? d : [item, ...d]));
-        setNotice(`Swipe failed (${e instanceof Error ? e.message : "who knows"}). Your card is back. Try again.`);
+        toast(`Swipe failed (${e instanceof Error ? e.message : "who knows"}). Card is back, try again.`);
       }
     },
-    [router],
+    [router, toast],
   );
 
   // Id-based so a double close can never skip the next queued match.
@@ -139,23 +139,19 @@ export default function DiscoverPage() {
   const activeMatch = matchQueue[0];
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center overflow-x-clip px-4 py-6">
-      <header className="mb-4 flex w-full items-baseline justify-between">
-        <h1 className="text-2xl font-black tracking-tight">
-          Discover <span className="font-mono text-sm font-normal text-neutral-500">{"// teammates.find()"}</span>
-        </h1>
+    // Ian's AppShell already provides <main>, the top bar and the tab bar (and bottom padding).
+    <div className="overflow-x-clip px-4 pt-5">
+      <header className="mb-4 flex items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-extrabold">Discover</h1>
+          <p className="mt-1 text-sm text-dim">Right to merge. Left to git rm. No take-backs.</p>
+        </div>
         {phase === "ready" && deck.length > 0 && (
-          <span className="font-mono text-xs text-neutral-500" aria-live="polite">
-            {deck.length} in queue
+          <span className="shrink-0 rounded-full border border-edge px-3 py-1 font-mono text-xs text-dim" aria-live="polite">
+            <span className="text-hi">{deck.length}</span> in queue
           </span>
         )}
       </header>
-
-      {notice && (
-        <p className="mb-3 w-full rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-3 py-2 text-center text-sm text-yellow-200" role="status">
-          {notice}
-        </p>
-      )}
 
       {phase === "loading" && <LoadingState />}
       {phase === "error" && <ErrorState message={error} onRetry={retry} />}
@@ -167,8 +163,16 @@ export default function DiscoverPage() {
         ))}
 
       <AnimatePresence>
-        {activeMatch && <MatchOverlay key={activeMatch.match.id} item={activeMatch.item} me={me} onClose={() => closeMatch(activeMatch.match.id)} />}
+        {activeMatch && (
+          <MatchOverlay
+            key={activeMatch.match.id}
+            item={activeMatch.item}
+            match={activeMatch.match}
+            me={me}
+            onClose={() => closeMatch(activeMatch.match.id)}
+          />
+        )}
       </AnimatePresence>
-    </main>
+    </div>
   );
 }

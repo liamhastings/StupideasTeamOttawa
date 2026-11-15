@@ -2,6 +2,7 @@
 
 import { AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { HeartIcon } from "@/components/ui/Icons";
 import SwipeCard from "./SwipeCard";
 import type { DeckItem, SwipeAction } from "./types";
 
@@ -57,7 +58,7 @@ export default function SwipeDeck({ deck, onSwipe, disabled = false }: SwipeDeck
   const visible = deck.slice(0, VISIBLE);
 
   return (
-    <div className="flex w-full max-w-sm flex-col items-center gap-6">
+    <div className="flex w-full flex-col items-center gap-6">
       {/* Every card sits in the same grid cell, so the stack is as tall as the tallest card. */}
       <div className="grid w-full grid-cols-1">
         <AnimatePresence custom={exitDir}>
@@ -73,30 +74,39 @@ export default function SwipeDeck({ deck, onSwipe, disabled = false }: SwipeDeck
         </AnimatePresence>
       </div>
 
-      <div className="flex items-center gap-8">
-        <button
-          type="button"
-          onClick={() => swipe("pass")}
-          disabled={disabled || deck.length === 0}
-          aria-label="Pass on this hacker (left arrow)"
-          className="group flex h-16 w-16 items-center justify-center rounded-full border-2 border-rose-500/60 bg-neutral-900 text-3xl shadow-lg transition hover:scale-110 hover:bg-rose-500/20 active:scale-95 disabled:opacity-40 disabled:hover:scale-100"
-        >
-          <span aria-hidden>🗑️</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => swipe("like")}
-          disabled={disabled || deck.length === 0}
-          aria-label="Like this hacker (right arrow)"
-          className="group flex h-20 w-20 items-center justify-center rounded-full border-2 border-emerald-400/70 bg-neutral-900 text-4xl shadow-lg transition hover:scale-110 hover:bg-emerald-400/20 active:scale-95 disabled:opacity-40 disabled:hover:scale-100"
-        >
-          <span aria-hidden>🤝</span>
-        </button>
+      {/* Sticky just above Ian's fixed TabBar (~4.25rem) so the buttons are never hidden on short phones. */}
+      <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-20 flex w-full items-end justify-center gap-10 bg-gradient-to-t from-floor via-floor/90 to-transparent pb-1 pt-4">
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => swipe("pass")}
+            disabled={disabled || deck.length === 0}
+            aria-label="Pass on this hacker (left arrow)"
+            className="grid h-16 w-16 place-items-center rounded-full border-2 border-ship/60 bg-slab text-ship transition hover:bg-ship/10 active:scale-95 disabled:pointer-events-none disabled:opacity-50"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" className="h-7 w-7" aria-hidden>
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+          <span className="font-mono text-xs text-dim" aria-hidden>
+            <kbd className="rounded border border-edge px-1">←</kbd> git rm
+          </span>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => swipe("like")}
+            disabled={disabled || deck.length === 0}
+            aria-label="Like this hacker (right arrow)"
+            className="grid h-20 w-20 place-items-center rounded-full bg-hi text-ink shadow-lg shadow-hi/20 transition hover:brightness-95 active:scale-95 disabled:pointer-events-none disabled:opacity-50"
+          >
+            <HeartIcon className="h-9 w-9" />
+          </button>
+          <span className="font-mono text-xs text-dim" aria-hidden>
+            git merge <kbd className="rounded border border-edge px-1">→</kbd>
+          </span>
+        </div>
       </div>
-      <p className="font-mono text-xs text-neutral-500">
-        <kbd className="rounded border border-white/20 px-1.5">←</kbd> git rm &nbsp;·&nbsp;{" "}
-        <kbd className="rounded border border-white/20 px-1.5">→</kbd> git merge
-      </p>
     </div>
   );
 }

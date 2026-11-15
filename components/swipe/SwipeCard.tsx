@@ -61,23 +61,23 @@ export default function SwipeCard({ item, index, exitDir, onSwipe }: SwipeCardPr
       ) : (
         // Cards underneath are just a peeking edge. No content, so no text bleeding through,
         // and h-full makes them as tall as the top card (the grid cell is sized by it).
-        <div className="h-full min-h-24 rounded-2xl border border-white/10 bg-neutral-800" />
+        <div className="h-full min-h-24 rounded-2xl border border-edge bg-slab" />
       )}
       {isTop && (
         <>
           <motion.div
             aria-hidden
             style={{ opacity: likeOpacity }}
-            className="pointer-events-none absolute left-4 top-4 -rotate-12 rounded-lg border-4 border-emerald-400 bg-black/40 px-3 py-1 font-mono text-2xl font-black tracking-widest text-emerald-400"
+            className="pointer-events-none absolute left-4 top-4 -rotate-12 rounded-lg border-4 border-ok bg-floor/80 px-3 py-1 font-display text-2xl font-black tracking-wide text-ok"
           >
-            LGTM ✅
+            LGTM
           </motion.div>
           <motion.div
             aria-hidden
             style={{ opacity: passOpacity }}
-            className="pointer-events-none absolute right-4 top-4 rotate-12 rounded-lg border-4 border-rose-500 bg-black/40 px-3 py-1 font-mono text-2xl font-black tracking-widest text-rose-500"
+            className="pointer-events-none absolute right-4 top-4 rotate-12 rounded-lg border-4 border-ship bg-floor/80 px-3 py-1 font-display text-2xl font-black tracking-wide text-ship"
           >
-            WONTFIX ❌
+            WONTFIX
           </motion.div>
         </>
       )}
