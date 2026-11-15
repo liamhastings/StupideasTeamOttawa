@@ -1,689 +1,207 @@
 import type { Profile } from "../lib/types";
+import { avatar, SKIN } from "./avatars";
 
-// 20 hackers. Several overlap on purpose so matching has variety.
+// ─── HOW TO ADD / EDIT A DEMO HACKER ─────────────────────────────────────────
+// 1. Put their photo in public/avatars/ (square, under ~300 KB), e.g. mia.jpg
+// 2. Copy a profile below and edit it. Use  avatarUrl: photo("mia.jpg")
+//    (or keep the drawn avatar({...}) one, or delete avatarUrl to use the emoji).
+// 3. Keep the id starting with "seed_" and unique (seed_11, seed_12, ...).
+// 4. styleTags / skillTags / lookingFor must be copied exactly from lib/tags.ts,
+//    otherwise matching can't score them.
+// 5. prompts: up to 3. handle is what a match gets to see.
+// Save and refresh: the dev server picks it up, no database reset needed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** A photo you dropped into public/avatars/. */
+const photo = (file: string) => `/avatars/${file}`;
+
+// 10 demo hackers with illustrated profile pictures. Ids must keep the "seed_"
+// prefix (the store refreshes them from this file; Kailen's demo rigging only
+// forges likes from seed profiles). Skills are spread out on purpose so every
+// kind of user gets a good match: designer, pitcher, backend, ML, hardware,
+// frontend, security, PM, full-stack, and one wide-eyed newbie.
+const T = "2026-11-15T09:00:00.000Z";
+
 export const SEED_PROFILES: Profile[] = [
   {
-    "id": "seed_01",
-    "name": "Dev 'sudo' Patel",
-    "handle": "@sudo_dev",
-    "avatarEmoji": "🐧",
-    "tagline": "I use Arch btw. Ask me anything. Please don't.",
-    "bio": "Has reinstalled their OS 14 times this semester for fun.",
-    "styleTags": [
-      "Arch btw",
-      "Linux god",
-      "mechanical keyboard cultist",
-      "dark mode only"
+    id: "seed_01",
+    name: "Dev 'sudo' Patel",
+    handle: "@sudo_dev",
+    avatarEmoji: "🐧",
+    avatarUrl: avatar({ bg: "#7aa2ff", skin: SKIN.tan, hair: "beanie", hairColor: "#22252f", shirt: "#2b3042", glasses: "square", mouth: "smirk", prop: "🐧" }),
+    tagline: "I use Arch btw. You didn't ask. I'm telling you anyway.",
+    bio: "Has reinstalled his OS 14 times this semester for fun. Thinks a GUI is a crutch. Will make your deploy pipeline beautiful and your frontend a terminal.",
+    styleTags: ["Arch btw", "Linux god", "mechanical keyboard cultist", "dark mode only"],
+    skillTags: ["backend brain", "devops / deploys", "embedded C"],
+    hackathonCount: 11,
+    lookingFor: ["can design in Figma", "great at public speaking"],
+    prompts: [
+      { question: "My hot take is…", answer: "GUIs are a social construct." },
+      { question: "You should match with me if…", answer: "you can make my terminal look pretty for the judges." },
     ],
-    "skillTags": [
-      "backend brain",
-      "devops / deploys",
-      "embedded C"
-    ],
-    "hackathonCount": 11,
-    "lookingFor": [
-      "can design in Figma",
-      "great at public speaking"
-    ],
-    "prompts": [
-      {
-        "question": "My hot take is…",
-        "answer": "GUIs are a social construct."
-      },
-      {
-        "question": "You should match with me if…",
-        "answer": "you can make my terminal look pretty."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
+    createdAt: T,
   },
   {
-    "id": "seed_02",
-    "name": "Mia Matcha",
-    "handle": "@matchamia",
-    "avatarEmoji": "🧋",
-    "tagline": "Matcha first, merge conflicts later.",
-    "bio": "Design lead who judges your font choices silently.",
-    "styleTags": [
-      "matcha enjoyer",
-      "light mode psychopath",
-      "organized chaos"
+    id: "seed_02",
+    name: "Mia Matcha",
+    handle: "@matchamia",
+    avatarEmoji: "🧋",
+    avatarUrl: avatar({ bg: "#3ddc97", skin: SKIN.light, hair: "bun", hairColor: "#6b3e26", shirt: "#f2f4fb", mouth: "smile", blush: true, prop: "🍵" }),
+    tagline: "Matcha first. Merge conflicts later.",
+    bio: "Product designer who judges your font choices silently, then loudly. Can turn a cursed wireframe into something a VC would frame. Brings her own whisk.",
+    styleTags: ["matcha enjoyer", "light mode psychopath", "organized chaos"],
+    skillTags: ["can design in Figma", "UX researcher", "CSS sorcerer"],
+    hackathonCount: 3,
+    lookingFor: ["backend brain", "API duct-taper"],
+    prompts: [
+      { question: "The way to my heart is…", answer: "oat milk and a consistent 8px grid." },
+      { question: "My biggest red flag is…", answer: "I will redo your padding while you're in the bathroom." },
+      { question: "I'm overly proud of…", answer: "a loading spinner that made a judge cry." },
     ],
-    "skillTags": [
-      "can design in Figma",
-      "UX researcher",
-      "CSS sorcerer"
-    ],
-    "hackathonCount": 3,
-    "lookingFor": [
-      "backend brain",
-      "API duct-taper"
-    ],
-    "prompts": [
-      {
-        "question": "The way to my heart is…",
-        "answer": "oat milk and a 4px border radius."
-      },
-      {
-        "question": "My biggest red flag is…",
-        "answer": "I will redo your padding."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
+    createdAt: T,
   },
   {
-    "id": "seed_03",
-    "name": "Big Mike",
-    "handle": "@bigmike_pitches",
-    "avatarEmoji": "🎤",
-    "tagline": "I can sell a to-do app to a VC.",
-    "bio": "Has never written a line of code. Has won 4 hackathons.",
-    "styleTags": [
-      "demo-day gambler",
-      "chaotic good",
-      "pizza-fueled"
+    id: "seed_03",
+    name: "Big Mike Okafor",
+    handle: "@bigmike_pitches",
+    avatarEmoji: "🎤",
+    avatarUrl: avatar({ bg: "#ffe14d", skin: SKIN.deep, hair: "buzz", hairColor: "#141217", shirt: "#ff5a3c", mouth: "grin", beard: true, prop: "🎤" }),
+    tagline: "I can sell a to-do app to a monk.",
+    bio: "Has never written a line of code. Has won 4 hackathons. Owns a blazer specifically for demo day. Will make your half-working prototype sound like Series A.",
+    styleTags: ["demo-day gambler", "chaotic good", "pizza-fueled"],
+    skillTags: ["great at public speaking", "pitch deck artist", "business / idea guy (with receipts)"],
+    hackathonCount: 7,
+    lookingFor: ["full-stack goblin", "frontend wizard"],
+    prompts: [
+      { question: "I'm 100% sure we'll win because…", answer: "I talk for 3 minutes and the judges forget to ask questions." },
+      { question: "Don't ask me about…", answer: "what the app actually does." },
     ],
-    "skillTags": [
-      "great at public speaking",
-      "pitch deck artist",
-      "business / idea guy (with receipts)"
-    ],
-    "hackathonCount": 7,
-    "lookingFor": [
-      "full-stack goblin",
-      "frontend wizard"
-    ],
-    "prompts": [
-      {
-        "question": "I'm 100% sure we'll win because…",
-        "answer": "I will talk for 3 minutes and the judges will forget to ask questions."
-      },
-      {
-        "question": "Don't ask me about…",
-        "answer": "what the app actually does."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
+    createdAt: T,
   },
   {
-    "id": "seed_04",
-    "name": "Priya 'Prod' Nair",
-    "handle": "@prod_priya",
-    "avatarEmoji": "🔥",
-    "tagline": "I deployed on Friday. Again.",
-    "bio": "Full-stack goblin who ships before understanding.",
-    "styleTags": [
-      "ships on vibes",
-      "git push --force enjoyer",
-      "commits at 4am"
+    id: "seed_04",
+    name: "Priya 'Prod' Nair",
+    handle: "@prod_priya",
+    avatarEmoji: "🔥",
+    avatarUrl: avatar({ bg: "#ff5a3c", skin: SKIN.medium, hair: "long", hairColor: "#1b1416", shirt: "#12141c", mouth: "smirk", prop: "🔥" }),
+    tagline: "I deployed on Friday. Again. On purpose.",
+    bio: "Full-stack goblin who ships before understanding. Database, API, frontend, all held together with TypeScript and spite. Commits at 4am, apologizes never.",
+    styleTags: ["ships on vibes", "git push --force enjoyer", "commits at 4am"],
+    skillTags: ["full-stack goblin", "TypeScript purist", "database whisperer"],
+    hackathonCount: 9,
+    lookingFor: ["can design in Figma", "video / demo editor"],
+    prompts: [
+      { question: "My most cursed commit message is…", answer: "fix fix fix FINAL final v2 (real)" },
+      { question: "At 3am you'll find me…", answer: "in production. Hi." },
     ],
-    "skillTags": [
-      "full-stack goblin",
-      "TypeScript purist",
-      "database whisperer"
-    ],
-    "hackathonCount": 9,
-    "lookingFor": [
-      "can design in Figma",
-      "pitch deck artist"
-    ],
-    "prompts": [
-      {
-        "question": "My most cursed commit message is…",
-        "answer": "fix fix fix final FINAL v2"
-      },
-      {
-        "question": "At 3am you'll find me…",
-        "answer": "in production."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
+    createdAt: T,
   },
   {
-    "id": "seed_05",
-    "name": "Kai the Rustacean",
-    "handle": "@rewrite_in_rust",
-    "avatarEmoji": "🦀",
-    "tagline": "Have you considered rewriting it in Rust?",
-    "bio": "Will rewrite your Python in Rust unprompted.",
-    "styleTags": [
-      "Linux god",
-      "lawful pedantic",
-      "tabs over spaces"
+    id: "seed_05",
+    name: "Luna Lovelace",
+    handle: "@luna_ml",
+    avatarEmoji: "🤖",
+    avatarUrl: avatar({ bg: "#c49bff", skin: SKIN.brown, hair: "curly", hairColor: "#24160f", shirt: "#ffe14d", glasses: "round", mouth: "smile", prop: "🤖" }),
+    tagline: "I fine-tune models and my coping mechanisms.",
+    bio: "ML engineer. Her model is 99% accurate on the training set and vibes on the test set. Can bolt AI onto anything, including things that should not have AI.",
+    styleTags: ["ChatGPT whisperer", "cold-brew dependent", "works best at 3am"],
+    skillTags: ["ML / AI", "Python for everything", "data wrangler", "prompt engineer"],
+    hackathonCount: 6,
+    lookingFor: ["frontend wizard", "can design in Figma"],
+    prompts: [
+      { question: "My hot take is…", answer: "every app is a wrapper. Mine is a wrapper with vibes." },
+      { question: "Don't ask me about…", answer: "the test set." },
     ],
-    "skillTags": [
-      "Rust evangelist",
-      "backend brain",
-      "embedded C"
-    ],
-    "hackathonCount": 5,
-    "lookingFor": [
-      "great at public speaking",
-      "video / demo editor"
-    ],
-    "prompts": [
-      {
-        "question": "I will mass-refactor your code if…",
-        "answer": "you say the word 'borrow'."
-      },
-      {
-        "question": "My hot take is…",
-        "answer": "garbage collection is a lifestyle choice."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
+    createdAt: T,
   },
   {
-    "id": "seed_06",
-    "name": "Luna Lovelace",
-    "handle": "@luna_ml",
-    "avatarEmoji": "🤖",
-    "tagline": "I fine-tune models and my own coping mechanisms.",
-    "bio": "ML engineer. Her model is 99% accurate on the training set.",
-    "styleTags": [
-      "ChatGPT whisperer",
-      "cold-brew dependent",
-      "works best at 3am"
+    id: "seed_06",
+    name: "Sam 'Solder' Kowalski",
+    handle: "@solder_sam",
+    avatarEmoji: "🔌",
+    avatarUrl: avatar({ bg: "#ffb347", skin: SKIN.fair, hair: "bald", hairColor: "#a0522d", shirt: "#3b4a6b", eyes: "sleepy", mouth: "flat", beard: true, prop: "🔌" }),
+    tagline: "Hardware hacker. Smells faintly of flux.",
+    bio: "Brings an oscilloscope to every hackathon. Nobody knows why. Can make anything blink, beep or catch fire. Has slept under 6 different venue desks.",
+    styleTags: ["sleeps under the desk", "stickers on laptop: 47", "snack hoarder"],
+    skillTags: ["hardware / IoT", "embedded C", "can run on 2 hours of sleep"],
+    hackathonCount: 12,
+    lookingFor: ["frontend wizard", "pitch deck artist"],
+    prompts: [
+      { question: "At 3am you'll find me…", answer: "soldering something that did not need to exist." },
+      { question: "You should match with me if…", answer: "you need a blinking LED. Everyone needs a blinking LED." },
     ],
-    "skillTags": [
-      "ML / AI",
-      "Python for everything",
-      "data wrangler",
-      "prompt engineer"
-    ],
-    "hackathonCount": 6,
-    "lookingFor": [
-      "frontend wizard",
-      "can design in Figma"
-    ],
-    "prompts": [
-      {
-        "question": "My hot take is…",
-        "answer": "every app is a wrapper. Mine is a wrapper with vibes."
-      },
-      {
-        "question": "Don't ask me about…",
-        "answer": "the test set."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
+    createdAt: T,
   },
   {
-    "id": "seed_07",
-    "name": "Sam 'Solder' Okafor",
-    "handle": "@solder_sam",
-    "avatarEmoji": "🔌",
-    "tagline": "Hardware hacker. Smells like flux.",
-    "bio": "Brings an oscilloscope to every hackathon. Nobody knows why.",
-    "styleTags": [
-      "sleeps under the desk",
-      "stickers on laptop: 47",
-      "snack hoarder"
+    id: "seed_07",
+    name: "Zoe 'div' Tremblay",
+    handle: "@zoe_centers_divs",
+    avatarEmoji: "💅",
+    avatarUrl: avatar({ bg: "#6ee7e0", skin: SKIN.light, hair: "spiky", hairColor: "#ff4fa3", shirt: "#12141c", eyes: "wink", mouth: "grin", prop: "💅" }),
+    tagline: "I can center a div. First try. No Stack Overflow.",
+    bio: "Frontend wizard. Animations so smooth you'll forget the app does nothing. Ships iOS and web from the same codebase and the same energy drink.",
+    styleTags: ["emoji in commit messages", "energy drink IV drip", "meme-driven development"],
+    skillTags: ["frontend wizard", "CSS sorcerer", "mobile dev"],
+    hackathonCount: 4,
+    lookingFor: ["backend brain", "database whisperer"],
+    prompts: [
+      { question: "I'm overly proud of…", answer: "a pure-CSS hamburger menu with a hover state." },
+      { question: "My biggest red flag is…", answer: "I use !important recreationally." },
     ],
-    "skillTags": [
-      "hardware / IoT",
-      "embedded C",
-      "video / demo editor"
-    ],
-    "hackathonCount": 12,
-    "lookingFor": [
-      "frontend wizard",
-      "pitch deck artist"
-    ],
-    "prompts": [
-      {
-        "question": "At 3am you'll find me…",
-        "answer": "soldering something that does not need to exist."
-      },
-      {
-        "question": "You should match with me if…",
-        "answer": "you need a blinking LED. Everyone needs a blinking LED."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
+    createdAt: T,
   },
   {
-    "id": "seed_08",
-    "name": "Zoe 'CSS' Tremblay",
-    "handle": "@zoe_div_center",
-    "avatarEmoji": "💅",
-    "tagline": "I can center a div. On the first try.",
-    "bio": "CSS sorceress. Animations so smooth you'll forget the app does nothing.",
-    "styleTags": [
-      "light mode psychopath",
-      "emoji in commit messages",
-      "matcha enjoyer"
+    id: "seed_08",
+    name: "Tobias 'Hello World' Lee",
+    handle: "@tobi_first_hack",
+    avatarEmoji: "🌱",
+    avatarUrl: avatar({ bg: "#ff9ecf", skin: SKIN.fair, hair: "short", hairColor: "#141217", shirt: "#3ddc97", mouth: "grin", blush: true, prop: "🌱" }),
+    tagline: "First hackathon. Please be gentle. Or don't, I'm here to learn.",
+    bio: "Eager newbie who read the docs. All of them. Writes Python, writes jokes, writes the README nobody else will. Will make coffee runs without being asked.",
+    styleTags: ["reads the docs (rare)", "touches grass (allegedly)", "pizza-fueled"],
+    skillTags: ["Python for everything", "copywriter / jokes"],
+    hackathonCount: 0,
+    lookingFor: ["7 hackathons deep", "full-stack goblin"],
+    prompts: [
+      { question: "I'm overly proud of…", answer: "a calculator that works. Mostly." },
+      { question: "You should match with me if…", answer: "you want someone who will laugh at your variable names." },
     ],
-    "skillTags": [
-      "CSS sorcerer",
-      "frontend wizard",
-      "can design in Figma"
-    ],
-    "hackathonCount": 4,
-    "lookingFor": [
-      "backend brain",
-      "database whisperer"
-    ],
-    "prompts": [
-      {
-        "question": "I'm overly proud of…",
-        "answer": "a pure CSS hamburger menu."
-      },
-      {
-        "question": "My biggest red flag is…",
-        "answer": "I use !important recreationally."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
+    createdAt: T,
   },
   {
-    "id": "seed_09",
-    "name": "Noah Null",
-    "handle": "@null_pointer_noah",
-    "avatarEmoji": "💀",
-    "tagline": "Security researcher. Yes, I already pwned your demo.",
-    "bio": "Found 3 XSS in the hackathon's own website.",
-    "styleTags": [
-      "dark mode only",
-      "headphones permanently on",
-      "no sleep, only deploy"
+    id: "seed_09",
+    name: "Noor Null",
+    handle: "@null_pointer_noor",
+    avatarEmoji: "💀",
+    avatarUrl: avatar({ bg: "#2b3042", skin: SKIN.medium, hair: "long", hairColor: "#7a2e1f", shirt: "#12141c", headphones: "#3ddc97", mouth: "flat", prop: "💀" }),
+    tagline: "Security researcher. I already found 3 bugs in your demo.",
+    bio: "Pwned the hackathon's own check-in site before lunch (responsibly disclosed, after lunch). Writes Rust, deploys infra, trusts no one, especially your .env file.",
+    styleTags: ["headphones permanently on", "dark mode only", "no sleep, only deploy"],
+    skillTags: ["security / hacking", "devops / deploys", "Rust evangelist"],
+    hackathonCount: 8,
+    lookingFor: ["pitch deck artist", "UX researcher"],
+    prompts: [
+      { question: "The way to my heart is…", answer: "a responsible disclosure and a hoodie." },
+      { question: "Don't ask me about…", answer: "the judges' wifi password. I know it." },
     ],
-    "skillTags": [
-      "security / hacking",
-      "backend brain",
-      "API duct-taper"
-    ],
-    "hackathonCount": 8,
-    "lookingFor": [
-      "pitch deck artist",
-      "UX researcher"
-    ],
-    "prompts": [
-      {
-        "question": "The way to my heart is…",
-        "answer": "a responsible disclosure."
-      },
-      {
-        "question": "Don't ask me about…",
-        "answer": "the judges' wifi."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
+    createdAt: T,
   },
   {
-    "id": "seed_10",
-    "name": "Ada 'Agile' Chen",
-    "handle": "@ada_standup",
-    "avatarEmoji": "📋",
-    "tagline": "Let's sync. Offline. Asynchronously.",
-    "bio": "Project manager who has run a standup at 2am. Everyone cried.",
-    "styleTags": [
-      "plans everything, builds nothing",
-      "organized chaos",
-      "lawful pedantic"
+    id: "seed_10",
+    name: "Ada 'Agile' Chen",
+    handle: "@ada_standup",
+    avatarEmoji: "📋",
+    avatarUrl: avatar({ bg: "#ffd6a5", skin: SKIN.light, hair: "short", hairColor: "#2a1d1a", shirt: "#7aa2ff", glasses: "square", mouth: "smile", prop: "📋" }),
+    tagline: "Let's sync. Offline. Asynchronously. In 5.",
+    bio: "Project manager who once ran a standup at 2am. Everyone cried. Everyone shipped. Also cuts the demo video and builds the deck while the devs argue about tabs.",
+    styleTags: ["plans everything, builds nothing", "organized chaos", "lawful pedantic"],
+    skillTags: ["project manager", "pitch deck artist", "video / demo editor"],
+    hackathonCount: 10,
+    lookingFor: ["ML / AI", "backend brain"],
+    prompts: [
+      { question: "My hot take is…", answer: "a Jira board at a hackathon is a power move." },
+      { question: "You should match with me if…", answer: "you need someone to say 'blocker' with confidence." },
     ],
-    "skillTags": [
-      "project manager",
-      "copywriter / jokes",
-      "pitch deck artist"
-    ],
-    "hackathonCount": 10,
-    "lookingFor": [
-      "full-stack goblin",
-      "ML / AI"
-    ],
-    "prompts": [
-      {
-        "question": "My hot take is…",
-        "answer": "Jira at a hackathon is a power move."
-      },
-      {
-        "question": "You should match with me if…",
-        "answer": "you need someone to say 'blocker' with confidence."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
+    createdAt: T,
   },
-  {
-    "id": "seed_11",
-    "name": "Felix Frontend",
-    "handle": "@felix_react",
-    "avatarEmoji": "🦄",
-    "tagline": "useEffect is my toxic ex.",
-    "bio": "React dev with 14 side projects and 0 launched.",
-    "styleTags": [
-      "tabs over spaces",
-      "stickers on laptop: 47",
-      "hoodie in July"
-    ],
-    "skillTags": [
-      "frontend wizard",
-      "TypeScript purist",
-      "CSS sorcerer"
-    ],
-    "hackathonCount": 2,
-    "lookingFor": [
-      "backend brain",
-      "devops / deploys"
-    ],
-    "prompts": [
-      {
-        "question": "My most cursed commit message is…",
-        "answer": "it works don't touch"
-      },
-      {
-        "question": "I'm 100% sure we'll win because…",
-        "answer": "my gradients are immaculate."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
-  },
-  {
-    "id": "seed_12",
-    "name": "Greta Graph",
-    "handle": "@greta_db",
-    "avatarEmoji": "🕸️",
-    "tagline": "I normalize databases and my feelings.",
-    "bio": "Database whisperer. Will fight you over SQL vs NoSQL.",
-    "styleTags": [
-      "lawful pedantic",
-      "spaces over tabs",
-      "reads the docs (rare)"
-    ],
-    "skillTags": [
-      "database whisperer",
-      "backend brain",
-      "data wrangler"
-    ],
-    "hackathonCount": 6,
-    "lookingFor": [
-      "can design in Figma",
-      "frontend wizard"
-    ],
-    "prompts": [
-      {
-        "question": "My hot take is…",
-        "answer": "MongoDB was a mistake."
-      },
-      {
-        "question": "Don't ask me about…",
-        "answer": "that one JOIN."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
-  },
-  {
-    "id": "seed_13",
-    "name": "Omar 'Unity' Haddad",
-    "handle": "@omar_gamedev",
-    "avatarEmoji": "🎮",
-    "tagline": "Everything is a game if you add a score.",
-    "bio": "Turned the hackathon check-in into a roguelike.",
-    "styleTags": [
-      "sleeps under the desk",
-      "energy drink IV drip",
-      "meme-driven development"
-    ],
-    "skillTags": [
-      "game dev",
-      "AR / VR",
-      "video / demo editor"
-    ],
-    "hackathonCount": 5,
-    "lookingFor": [
-      "backend brain",
-      "great at public speaking"
-    ],
-    "prompts": [
-      {
-        "question": "At 3am you'll find me…",
-        "answer": "tweaking jump physics."
-      },
-      {
-        "question": "I'm overly proud of…",
-        "answer": "a pun in the loading screen."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
-  },
-  {
-    "id": "seed_14",
-    "name": "Rina Ripley",
-    "handle": "@rina_cuts",
-    "avatarEmoji": "🎬",
-    "tagline": "I will make your demo video look like a Netflix doc.",
-    "bio": "Video editor. 'Demo is the product' is her whole belief system.",
-    "styleTags": [
-      "demo-day gambler",
-      "chaotic good",
-      "cold-brew dependent"
-    ],
-    "skillTags": [
-      "video / demo editor",
-      "copywriter / jokes",
-      "can design in Figma"
-    ],
-    "hackathonCount": 7,
-    "lookingFor": [
-      "full-stack goblin",
-      "ML / AI"
-    ],
-    "prompts": [
-      {
-        "question": "You should match with me if…",
-        "answer": "you want a trailer with dramatic music."
-      },
-      {
-        "question": "The way to my heart is…",
-        "answer": "B-roll."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
-  },
-  {
-    "id": "seed_15",
-    "name": "Tobias 'Hello World' Lee",
-    "handle": "@tobi_first_hack",
-    "avatarEmoji": "🌱",
-    "tagline": "First hackathon. Please be gentle.",
-    "bio": "Eager newbie who read the docs. All of them.",
-    "styleTags": [
-      "reads the docs (rare)",
-      "touches grass (allegedly)",
-      "pizza-fueled"
-    ],
-    "skillTags": [
-      "Python for everything",
-      "API duct-taper"
-    ],
-    "hackathonCount": 0,
-    "lookingFor": [
-      "7 hackathons deep",
-      "full-stack goblin"
-    ],
-    "prompts": [
-      {
-        "question": "I'm overly proud of…",
-        "answer": "a calculator that works."
-      },
-      {
-        "question": "My biggest red flag is…",
-        "answer": "I ask 'why' a lot."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
-  },
-  {
-    "id": "seed_16",
-    "name": "Vera Vim",
-    "handle": "@vera_vim",
-    "avatarEmoji": "⌨️",
-    "tagline": "I can exit vim. I've never told anyone how.",
-    "bio": "Terminal maximalist. Her IDE is a shell script.",
-    "styleTags": [
-      "vim exit-code survivor",
-      "mechanical keyboard cultist",
-      "Arch btw"
-    ],
-    "skillTags": [
-      "backend brain",
-      "devops / deploys",
-      "Python for everything"
-    ],
-    "hackathonCount": 9,
-    "lookingFor": [
-      "can design in Figma",
-      "pitch deck artist"
-    ],
-    "prompts": [
-      {
-        "question": "My hot take is…",
-        "answer": "mice are a scam."
-      },
-      {
-        "question": "I will mass-refactor your code if…",
-        "answer": "I see a semicolon in my Python."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
-  },
-  {
-    "id": "seed_17",
-    "name": "Jonas Jinx",
-    "handle": "@jonas_blockchain",
-    "avatarEmoji": "🃏",
-    "tagline": "It's not a scam, it's a decentralized opportunity.",
-    "bio": "Blockchain guy. Everything is on-chain, including his lunch.",
-    "styleTags": [
-      "ships on vibes",
-      "chaotic good",
-      "hoodie in July"
-    ],
-    "skillTags": [
-      "blockchain (sorry)",
-      "TypeScript purist",
-      "business / idea guy (with receipts)"
-    ],
-    "hackathonCount": 4,
-    "lookingFor": [
-      "UX researcher",
-      "copywriter / jokes"
-    ],
-    "prompts": [
-      {
-        "question": "My hot take is…",
-        "answer": "web3 will come back."
-      },
-      {
-        "question": "Don't ask me about…",
-        "answer": "gas fees."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
-  },
-  {
-    "id": "seed_18",
-    "name": "Esme Empathy",
-    "handle": "@esme_ux",
-    "avatarEmoji": "🔍",
-    "tagline": "I interviewed 12 users. At a hackathon. At 2am.",
-    "bio": "UX researcher who found out nobody wants the product.",
-    "styleTags": [
-      "organized chaos",
-      "light mode psychopath",
-      "matcha enjoyer"
-    ],
-    "skillTags": [
-      "UX researcher",
-      "can design in Figma",
-      "copywriter / jokes"
-    ],
-    "hackathonCount": 3,
-    "lookingFor": [
-      "backend brain",
-      "ML / AI"
-    ],
-    "prompts": [
-      {
-        "question": "The way to my heart is…",
-        "answer": "a thoughtful user flow."
-      },
-      {
-        "question": "My biggest red flag is…",
-        "answer": "I will ask 'but why?' in the final hour."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
-  },
-  {
-    "id": "seed_19",
-    "name": "Marcus 'Mobile' Wu",
-    "handle": "@marcus_swift",
-    "avatarEmoji": "📱",
-    "tagline": "My app works on exactly one iPhone.",
-    "bio": "Swift dev. Demo works on his phone only. Do not ask for the APK.",
-    "styleTags": [
-      "energy drink IV drip",
-      "commits at 4am",
-      "TODO: finish this"
-    ],
-    "skillTags": [
-      "mobile dev",
-      "full-stack goblin",
-      "API duct-taper"
-    ],
-    "hackathonCount": 8,
-    "lookingFor": [
-      "can design in Figma",
-      "pitch deck artist",
-      "great at public speaking"
-    ],
-    "prompts": [
-      {
-        "question": "My most cursed commit message is…",
-        "answer": "TODO: remove before demo"
-      },
-      {
-        "question": "At 3am you'll find me…",
-        "answer": "fighting provisioning profiles."
-      }
-    ],
-    "createdAt": "2026-11-15T09:00:00.000Z"
-  },
-{
-  "id": "seed_20",
-  "name": "Dr. Dan 'Duck' Moreau",
-  "handle": "@duck_debugger",
-  "avatarEmoji": "🦆",
-  "tagline": "My rubber duck writes better code than me.",
-  "bio": "Veteran of 15 hackathons. Has lost count of the times he said 'it works on my machine'.",
-  "styleTags": [
-    "rubber duck owner",
-    "Stack Overflow archaeologist",
-    "console.log debugger",
-    "no sleep, only deploy"
-  ],
-  "skillTags": [
-    "7 hackathons deep",
-    "full-stack goblin",
-    "can run on 2 hours of sleep",
-    "devops / deploys"
-  ],
-  "hackathonCount": 15,
-  "lookingFor": [
-    "can design in Figma",
-    "video / demo editor"
-  ],
-  "prompts": [
-    {
-      "question": "My hot take is…",
-      "answer": "The duck is the senior engineer."
-    },
-    {
-      "question": "You should match with me if…",
-      "answer": "you want someone who has seen every possible failure mode."
-    }
-  ],
-  "createdAt": "2026-11-15T09:00:00.000Z"
-}
 ];

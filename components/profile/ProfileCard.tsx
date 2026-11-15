@@ -66,7 +66,7 @@ function Chips({ label, tags, tone }: { label: string; tags: string[]; tone: "hi
 export default function ProfileCard({ profile, compat, compact }: ProfileCardProps) {
   if (compact) {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-edge bg-slab p-3">
+      <div className="flex items-center gap-3 rounded-2xl border border-edge bg-slab p-3 text-snow">
         <Avatar profile={profile} className="h-12 w-12 bg-floor text-2xl" />
         <div className="min-w-0 flex-1">
           <div className="truncate font-display text-sm font-bold">{profile.name}</div>
@@ -78,7 +78,7 @@ export default function ProfileCard({ profile, compat, compact }: ProfileCardPro
   }
 
   return (
-    <article className="overflow-hidden rounded-3xl border border-edge bg-slab">
+    <article className="overflow-hidden rounded-3xl border border-edge bg-slab text-snow">
       {/* Name badge */}
       <header className="relative bg-badge text-ink">
         <span aria-hidden className="absolute left-1/2 top-2.5 h-2.5 w-14 -translate-x-1/2 rounded-full bg-floor" />
