@@ -9,7 +9,8 @@ import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { NextResponse } from "next/server";
-import { getMatches } from "@/lib/store";
+import { getMatches, getProfile } from "@/lib/store";
+import { botReplies } from "../swipes/_bots";
 import { withSwipeLock } from "../swipes/_lock";
 
 interface ChatMessage {
@@ -87,18 +88,22 @@ export async function POST(req: Request) {
     createdAt: new Date(now).toISOString(),
   };
   const otherId = fromId === match.userAId ? match.userBId : match.userAId;
+  // Demo characters have their own lines; other seed hackers use the generic ones.
+  const other = await getProfile(otherId);
+  const cannedPool = botReplies(other) ?? (otherId.startsWith("seed_") ? REPLIES : undefined);
+  const senderIsCanned = fromId.startsWith("seed_") || !!botReplies(await getProfile(fromId));
 
   try {
     await withSwipeLock(async () => {
       const all = await readAll();
       all.push(msg);
-      // Seed hackers answer humans (never each other, never themselves).
-      if (otherId.startsWith("seed_") && !fromId.startsWith("seed_")) {
+      // Seed hackers and demo characters answer humans (never each other, never themselves).
+      if (cannedPool && !senderIsCanned) {
         all.push({
           id: crypto.randomUUID(),
           matchId,
           fromId: otherId,
-          text: REPLIES[Math.floor(Math.random() * REPLIES.length)],
+          text: cannedPool[Math.floor(Math.random() * cannedPool.length)],
           createdAt: new Date(now + 1200 + Math.random() * 1000).toISOString(),
         });
       }

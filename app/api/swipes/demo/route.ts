@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server";
 import { addSwipe, getProfiles, getSwipes } from "@/lib/store";
 import { score } from "@/lib/scoring";
+import { ensureBots, isBot } from "../_bots";
 import { withSwipeLock } from "../_lock";
 
 export async function POST(req: Request) {
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
   const count = Number.isFinite(n) ? Math.max(1, Math.min(10, Math.floor(n))) : 3;
 
   return withSwipeLock(async () => {
+    await ensureBots(); // the two demo characters exist from now on
     const [profiles, swipes] = await Promise.all([getProfiles(), getSwipes()]);
     const me = profiles.find((p) => p.id === userId);
     if (!me) return NextResponse.json({ error: "No hacker with that id. Go make a profile." }, { status: 404 });
@@ -34,9 +36,10 @@ export async function POST(req: Request) {
     const swiped = new Set(swipes.filter((s) => s.fromId === userId).map((s) => s.toId));
     const passedOnMe = new Set(swipes.filter((s) => s.toId === userId && s.action === "pass").map((s) => s.fromId));
     const picks = profiles
-      .filter((p) => p.id.startsWith("seed_") && p.id !== userId && !swiped.has(p.id) && !passedOnMe.has(p.id))
+      .filter((p) => (p.id.startsWith("seed_") || isBot(p)) && p.id !== userId && !swiped.has(p.id) && !passedOnMe.has(p.id))
       .map((p) => ({ p, s: score(me, p).score }))
-      .sort((x, y) => y.s - x.s || x.p.id.localeCompare(y.p.id))
+      // Demo characters first (they're the chat stars), then the best-scoring seeds.
+      .sort((x, y) => Number(isBot(y.p)) - Number(isBot(x.p)) || y.s - x.s || x.p.id.localeCompare(y.p.id))
       .slice(0, count)
       .map((x) => x.p);
 
