@@ -32,13 +32,25 @@ function ScoreBadge({ compat }: { compat: Compat }) {
   );
 }
 
+// Uploaded photo if there is one, otherwise the emoji.
+export function Avatar({ profile, className }: { profile: Pick<Profile, "avatarEmoji" | "avatarUrl" | "name">; className: string }) {
+  if (profile.avatarUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={profile.avatarUrl} alt={profile.name} className={`${className} object-cover`} />
+    );
+  }
+  return <span className={`${className} flex items-center justify-center`}>{profile.avatarEmoji}</span>;
+}
+
 export default function ProfileCard({ profile, compat, compact }: ProfileCardProps) {
   if (compact) {
     return (
       <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-neutral-900 p-3 text-white">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-600/40 to-orange-500/40 text-2xl">
-          {profile.avatarEmoji}
-        </span>
+        <Avatar
+          profile={profile}
+          className="h-12 w-12 shrink-0 rounded-full bg-gradient-to-br from-fuchsia-600/40 to-orange-500/40 text-2xl"
+        />
         <div className="min-w-0 flex-1">
           <div className="truncate font-semibold">{profile.name}</div>
           <div className="truncate text-sm text-neutral-400">{profile.tagline}</div>
@@ -51,9 +63,10 @@ export default function ProfileCard({ profile, compat, compact }: ProfileCardPro
   return (
     <article className="w-full overflow-hidden rounded-3xl border border-white/10 bg-neutral-900 text-white shadow-xl">
       <header className="flex items-center gap-4 bg-gradient-to-br from-fuchsia-600/30 via-neutral-900 to-orange-500/20 p-5">
-        <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/30 text-5xl">
-          {profile.avatarEmoji}
-        </span>
+        <Avatar
+          profile={profile}
+          className="h-20 w-20 shrink-0 rounded-full border border-white/20 bg-black/30 text-5xl"
+        />
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-2xl font-extrabold tracking-tight">{profile.name}</h2>
           <p className="text-sm text-neutral-300">{profile.tagline}</p>

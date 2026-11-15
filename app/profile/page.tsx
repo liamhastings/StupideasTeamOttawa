@@ -68,7 +68,7 @@ export default function ProfilePage() {
               submitLabel="Save changes 💾"
               initial={{
                 name: profile.name, handle: profile.handle, avatarEmoji: profile.avatarEmoji,
-                tagline: profile.tagline, bio: profile.bio, styleTags: profile.styleTags,
+                avatarUrl: profile.avatarUrl, tagline: profile.tagline, bio: profile.bio, styleTags: profile.styleTags,
                 skillTags: profile.skillTags, hackathonCount: profile.hackathonCount,
                 lookingFor: profile.lookingFor, prompts: profile.prompts,
               }}
@@ -81,7 +81,7 @@ export default function ProfilePage() {
         ) : (
           <>
             <h1 className="mb-4 text-3xl font-extrabold text-white">This is you. Yikes.</h1>
-            {saved && <p className="mb-3 rounded-lg bg-emerald-500/15 p-3 text-sm text-emerald-300">✅ Saved. You're now 3% more hireable.</p>}
+            {saved && <p className="mb-3 rounded-lg bg-emerald-500/15 p-3 text-sm text-emerald-300">✅ Saved. You&apos;re now 3% more hireable.</p>}
             <ProfileCard profile={profile} />
             <p className="mt-3 text-sm text-neutral-400">
               Contact handle (only shown after a match): <span className="font-mono text-white">{profile.handle}</span>

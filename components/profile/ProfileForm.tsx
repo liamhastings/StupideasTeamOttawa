@@ -32,6 +32,29 @@ const STEPS = [
 const inputCls =
   "w-full rounded-xl border border-white/15 bg-neutral-800 px-3 py-2.5 text-white placeholder-neutral-500 outline-none focus:border-fuchsia-400";
 
+// Center-crop + shrink an uploaded image to a small square JPEG data URL,
+// so it fits comfortably in the JSON store.
+async function fileToAvatar(file: File, size = 320): Promise<string> {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = url;
+    });
+    const side = Math.min(img.naturalWidth, img.naturalHeight);
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("no canvas");
+    ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
+    return canvas.toDataURL("image/jpeg", 0.85);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 function TagPicker({
   options,
   selected,
@@ -112,6 +135,43 @@ export default function ProfileForm({
 
   const sections: React.ReactNode[] = [
     <div key="0" className="space-y-4">
+      <div className="flex items-center gap-4 rounded-xl bg-white/5 p-3">
+        {d.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={d.avatarUrl} alt="Your photo" className="h-16 w-16 rounded-full border border-white/20 object-cover" />
+        ) : (
+          <span className="flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-neutral-800 text-3xl">
+            {d.avatarEmoji}
+          </span>
+        )}
+        <div className="flex flex-wrap gap-2">
+          <label className="cursor-pointer rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold hover:bg-white/10">
+            📸 {d.avatarUrl ? "Change photo" : "Upload a photo"}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (!file) return;
+                try {
+                  set("avatarUrl", await fileToAvatar(file));
+                  setError("");
+                } catch {
+                  setError("Couldn't read that image. Is it a photo or a cursed .heic?");
+                }
+              }}
+            />
+          </label>
+          {d.avatarUrl && (
+            <button type="button" onClick={() => set("avatarUrl", undefined)} className="rounded-xl px-3 py-2 text-sm text-neutral-400 hover:text-white">
+              Remove (back to emoji)
+            </button>
+          )}
+        </div>
+      </div>
+      <p className="text-xs text-neutral-500">No photo? Pick an emoji. Honestly more on-brand.</p>
       <div className="flex flex-wrap gap-2">
         {AVATAR_EMOJIS.map((e) => (
           <button
