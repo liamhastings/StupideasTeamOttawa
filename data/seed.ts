@@ -100,7 +100,7 @@ export const SEED_PROFILES: Profile[] = [
     avatarEmoji: "",
     ...mine("afaq-1.jpg", "afaq-2.jpg"),
     tagline: "I organized this hackathon. Swiping left on me is technically a code of conduct violation.",
-    bio: "Has not written a single line of code this weekend. Has answered 'where's the bathroom' 412 times. Told 200 people to get some sleep, slept 0 hours himself. Swiping right does not guarantee you win. It also doesn't NOT guarantee it.",
+    bio: "Has not written a single line of code this weekend. Has answered 'where's the bathroom' 412 times. Told 200 people to get some sleep, slept 0 hours himself. Personally guarded the shawarma line. Swiping right does not guarantee you win. It also doesn't NOT guarantee it.",
     styleTags: ["chaotic good", "no sleep, only deploy", "energy drink IV drip"],
     skillTags: ["great at public speaking", "project manager", "business / idea guy (with receipts)"],
     hackathonCount: 15,
@@ -108,7 +108,7 @@ export const SEED_PROFILES: Profile[] = [
     prompts: [
       { question: "My biggest red flag is…", answer: "I'll make you fill out a feedback form after our first date." },
       { question: "I'm overly proud of…", answer: "getting 200 hackers to stop talking with one 'okay everyone'. It took 11 tries." },
-      { question: "Don't ask me about…", answer: "the budget. Or why the pizza arrived at 4am. Those are related." },
+      { question: "Don't ask me about…", answer: "the budget. Or why there was a matcha bar. Those are related." },
     ],
     createdAt: T,
   },
