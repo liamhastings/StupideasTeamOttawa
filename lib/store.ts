@@ -17,7 +17,11 @@ const DB_PATH = process.env.VERCEL
   ? path.join(os.tmpdir(), "grinder-db.json")
   : path.join(process.cwd(), "data", "db.json");
 
-let memory: DB | null = null;
+// Cache lives on globalThis: Next can load this module once per route bundle, and
+// every route must see the same data (same trick as app/api/swipes/_lock.ts).
+const KEY = "__grinder_db__";
+type G = typeof globalThis & { [KEY]?: DB };
+const g = globalThis as G;
 
 function withFreshSeeds(db: DB): DB {
   return {
@@ -27,18 +31,20 @@ function withFreshSeeds(db: DB): DB {
 }
 
 async function readDB(): Promise<DB> {
-  if (memory) return memory;
+  if (g[KEY]) return g[KEY];
+  let db: DB;
   try {
     const raw = await fs.readFile(DB_PATH, "utf8");
-    memory = withFreshSeeds(JSON.parse(raw) as DB);
+    db = withFreshSeeds(JSON.parse(raw) as DB);
   } catch {
-    memory = { profiles: [...SEED_PROFILES], swipes: [], matches: [] };
+    db = { profiles: [...SEED_PROFILES], swipes: [], matches: [] };
   }
-  return memory;
+  g[KEY] ??= db; // another request may have loaded it while we awaited
+  return g[KEY];
 }
 
 async function writeDB(db: DB): Promise<void> {
-  memory = db;
+  g[KEY] = db;
   try {
     await fs.mkdir(path.dirname(DB_PATH), { recursive: true });
     await fs.writeFile(DB_PATH, JSON.stringify(db, null, 2), "utf8");
