@@ -4,6 +4,7 @@
 import { NextResponse } from "next/server";
 import { score } from "@/lib/scoring";
 import { getProfiles, getSwipes } from "@/lib/store";
+import { isRetired } from "../swipes/_bots";
 import { withSwipeLock } from "../swipes/_lock";
 
 export async function GET(req: Request) {
@@ -19,7 +20,7 @@ export async function GET(req: Request) {
     const admirers = new Set(swipes.filter((s) => s.toId === userId && s.action === "like").map((s) => s.fromId));
 
     const items = profiles
-      .filter((p) => p.id !== userId && admirers.has(p.id) && !iSwiped.has(p.id))
+      .filter((p) => p.id !== userId && admirers.has(p.id) && !iSwiped.has(p.id) && !isRetired(p))
       .map((profile) => ({ profile, compat: score(me, profile) }))
       .sort((a, b) => b.compat.score - a.compat.score || a.profile.id.localeCompare(b.profile.id));
     return NextResponse.json(items);

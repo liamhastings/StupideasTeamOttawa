@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       .map((p) => ({ p, s: score(me, p).score }))
       // Demo characters first (they're the chat stars), then the best-scoring seeds.
       .sort((x, y) => Number(isBot(y.p)) - Number(isBot(x.p)) || y.s - x.s || x.p.id.localeCompare(y.p.id))
-      // Featured characters (Larry, Agent Sleeper, Sam, Jensen) always make the cut, plus the best seeds up to `count`.
+      // Featured characters (Agent Sleeper, Sam, Jensen) always make the cut, plus the best seeds up to `count`.
       .slice(0, Math.max(count, featuredCount))
       .map((x) => x.p);
 

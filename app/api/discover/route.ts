@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import { getProfiles, getSwipes } from "@/lib/store";
 import { score } from "@/lib/scoring";
+import { isRetired } from "../swipes/_bots";
 import { withSwipeLock } from "../swipes/_lock";
 
 export async function GET(req: Request) {
@@ -26,7 +27,7 @@ export async function GET(req: Request) {
 
   const swiped = new Set(swipes.filter((s) => s.fromId === userId).map((s) => s.toId));
   const deck = profiles
-    .filter((p) => p.id !== userId && !swiped.has(p.id))
+    .filter((p) => p.id !== userId && !swiped.has(p.id) && !isRetired(p))
     .map((profile) => ({ profile, compat: score(me, profile) }))
     // Stable tiebreak on id so the deck order doesn't shuffle between refreshes.
     .sort((x, y) => y.compat.score - x.compat.score || x.profile.id.localeCompare(y.profile.id));
