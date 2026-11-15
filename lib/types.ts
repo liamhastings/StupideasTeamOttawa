@@ -5,7 +5,8 @@ export interface Profile {
   name: string;
   handle: string; // Discord/Telegram etc., only revealed after match
   avatarEmoji: string;
-  avatarUrl?: string; // optional picture: uploaded JPEG data URL, or SVG data URL for seed profiles; falls back to avatarEmoji
+  avatarUrl?: string; // small round avatar: uploaded JPEG data URL, seed SVG, or /avatars/ path. Usually photos[0]. Falls back to initials.
+  photos?: string[]; // up to 3 big Hinge-style pictures shown on ProfileCard (same formats as avatarUrl)
   tagline: string;
   bio: string;
   styleTags: string[]; // from lib/tags.ts STYLE_TAGS

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { Profile } from "@/lib/types";
 import { PROMPT_QUESTIONS, SKILL_TAGS, STYLE_TAGS } from "@/lib/tags";
-import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
 
 export type ProfileDraft = Omit<Profile, "id" | "createdAt">;
@@ -22,12 +21,12 @@ export const EMPTY_DRAFT: ProfileDraft = {
 };
 
 const STEPS = [
-  { title: "Who are you, hacker?", sub: "Add a photo. Pick a name. Pretend it's not a cry for help." },
+  { title: "Who are you, hacker?", sub: "Add some photos. Pick a name. Pretend it's not a cry for help." },
   { title: "Your pitch", sub: "One line to hook them. One paragraph to ruin it." },
   { title: "Your vibe", sub: "How do you hack? Choose your fighter(s)." },
   { title: "Your skills", sub: "What can you actually do? We won't check. Probably." },
   { title: "Your dream teammate", sub: "Which skills would complete your sad, incomplete team?" },
-  { title: "Prompts", sub: "Answer up to 3. Funny beats correct." },
+  { title: "Prompts", sub: "Answer all 3. Funny beats correct. Judges read these." },
   { title: "How do we reach you?", sub: "Only revealed after a mutual match. We're not animals." },
 ];
 
@@ -36,9 +35,10 @@ const inputCls =
 
 const labelCls = "mb-1.5 block text-sm font-semibold text-dim";
 
-// Center-crop + shrink an uploaded image to a small square JPEG data URL,
-// so it fits comfortably in the JSON store.
-async function fileToAvatar(file: File, size = 320): Promise<string> {
+// Center-crop an uploaded image to a 4:5 portrait JPEG data URL (Hinge-style),
+// small enough to live in the JSON store.
+const MAX_PHOTOS = 3;
+async function fileToPhoto(file: File, w = 720, h = 900): Promise<string> {
   const url = URL.createObjectURL(file);
   try {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -47,13 +47,15 @@ async function fileToAvatar(file: File, size = 320): Promise<string> {
       i.onerror = reject;
       i.src = url;
     });
-    const side = Math.min(img.naturalWidth, img.naturalHeight);
+    const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+    const sw = w / scale, sh = h / scale;
     const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = size;
+    canvas.width = w;
+    canvas.height = h;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("no canvas");
-    ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
-    return canvas.toDataURL("image/jpeg", 0.85);
+    ctx.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, 0, 0, w, h);
+    return canvas.toDataURL("image/jpeg", 0.8);
   } finally {
     URL.revokeObjectURL(url);
   }
@@ -106,7 +108,12 @@ export default function ProfileForm({
   onSubmit: (draft: ProfileDraft) => Promise<string | void>;
   onCancel?: () => void;
 }) {
-  const [d, setD] = useState<ProfileDraft>(initial ?? EMPTY_DRAFT);
+  const [d, setD] = useState<ProfileDraft>(() => {
+    const start = initial ?? EMPTY_DRAFT;
+    return { ...start, photos: start.photos?.length ? start.photos : start.avatarUrl ? [start.avatarUrl] : [] };
+  });
+  const photos = d.photos ?? [];
+  const setPhotos = (next: string[]) => setD((p) => ({ ...p, photos: next, avatarUrl: next[0] }));
   const [step, setStep] = useState(0);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -130,7 +137,7 @@ export default function ProfileForm({
     if (err) return setError(err);
     setBusy(true);
     setError("");
-    const cleaned: ProfileDraft = { ...d, prompts: d.prompts.filter((p) => p.answer.trim()).slice(0, 3) };
+    const cleaned: ProfileDraft = { ...d, avatarUrl: photos[0], photos, prompts: d.prompts.filter((p) => p.answer.trim()).slice(0, 3) };
     const res = await onSubmit(cleaned);
     if (res) setError(res);
     setBusy(false);
@@ -138,36 +145,62 @@ export default function ProfileForm({
 
   const sections: React.ReactNode[] = [
     <div key="0" className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Avatar profile={{ name: d.name, avatarUrl: d.avatarUrl }} size={80} ring />
-        <div className="flex flex-col items-start gap-1">
-          <label className="cursor-pointer rounded-full border border-edge px-4 py-2 text-sm font-bold transition hover:bg-slab">
-            {d.avatarUrl ? "Change photo" : "Upload a photo"}
-            <input
-              type="file"
-              accept="image/*"
-              className="sr-only"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                e.target.value = "";
-                if (!file) return;
-                try {
-                  set("avatarUrl", await fileToAvatar(file));
-                  setError("");
-                } catch {
-                  setError("Couldn't read that image. Is it a photo or a cursed .heic?");
-                }
-              }}
-            />
-          </label>
-          {d.avatarUrl ? (
-            <button type="button" onClick={() => set("avatarUrl", undefined)} className="px-1 text-xs text-dim underline-offset-2 hover:text-snow hover:underline">
-              Remove photo
-            </button>
-          ) : (
-            <span className="px-1 text-xs text-dim">Photos only. No photo, no problem: you get initials.</span>
-          )}
+      <div>
+        <div className="grid grid-cols-3 gap-2">
+          {Array.from({ length: MAX_PHOTOS }, (_, i) => {
+            const src = photos[i];
+            const next = i === photos.length; // only the first empty slot is clickable
+            return (
+              <div key={i} className="relative aspect-[4/5] overflow-hidden rounded-xl">
+                {src ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt={`Photo ${i + 1}`} className="h-full w-full object-cover" />
+                    {i === 0 && <span className="absolute left-1.5 top-1.5 rounded-md bg-ink/80 px-1.5 py-0.5 text-[10px] font-bold text-hi">MAIN</span>}
+                    <button
+                      type="button"
+                      aria-label={`Remove photo ${i + 1}`}
+                      onClick={() => setPhotos(photos.filter((_, j) => j !== i))}
+                      className="absolute right-1.5 top-1.5 grid h-7 w-7 place-items-center rounded-full bg-ink/80 text-sm font-bold text-snow hover:bg-ship"
+                    >
+                      ×
+                    </button>
+                  </>
+                ) : (
+                  <label
+                    className={`grid h-full w-full place-items-center rounded-xl border-2 border-dashed text-center transition ${
+                      next ? "cursor-pointer border-hi/60 bg-hi/5 hover:bg-hi/10" : "border-edge bg-slab/50 opacity-50"
+                    }`}
+                  >
+                    <span>
+                      <span className={`block text-3xl font-light ${next ? "text-hi" : "text-dim"}`}>+</span>
+                      <span className="mt-1 block px-2 text-[11px] text-dim">{i === 0 ? "Main photo" : "Add photo"}</span>
+                    </span>
+                    {next && (
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          e.target.value = "";
+                          if (!file) return;
+                          try {
+                            setPhotos([...photos, await fileToPhoto(file)].slice(0, MAX_PHOTOS));
+                            setError("");
+                          } catch {
+                            setError("Couldn't read that image. Is it a photo or a cursed .heic?");
+                          }
+                        }}
+                      />
+                    )}
+                  </label>
+                )}
+              </div>
+            );
+          })}
         </div>
+        <p className="mt-2 text-xs text-dim">Up to 3. The first one is your avatar. Hackers with 2+ photos get 0% more matches, probably.</p>
       </div>
       <label className="block">
         <span className={labelCls}>Name</span>

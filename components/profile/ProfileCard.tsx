@@ -1,6 +1,6 @@
 import type { Compat, Profile } from "@/lib/types";
 import { bandFor } from "@/components/ui/BadgeTile";
-import UiAvatar from "@/components/ui/Avatar";
+import UiAvatar, { initials } from "@/components/ui/Avatar";
 
 export interface ProfileCardProps {
   profile: Profile;
@@ -57,57 +57,83 @@ export default function ProfileCard({ profile, compat, compact }: ProfileCardPro
     );
   }
 
+  const photos = profile.photos?.length ? profile.photos : profile.avatarUrl ? [profile.avatarUrl] : [];
+  const prompts = profile.prompts.slice(0, 3);
+  // Hinge rhythm: photo, prompt, (about block), photo, prompt, photo, prompt...
+  const rounds = Math.max(photos.length, prompts.length, 1);
+
+  const about = (
+    <section key="about" className="space-y-5 rounded-2xl bg-slab p-5">
+      {compat && compat.reasons.length > 0 && (
+        <ul className="space-y-1.5 rounded-xl border border-ok/30 bg-ok/5 p-4 text-sm">
+          {compat.reasons.map((r) => (
+            <li key={r} className="flex gap-2">
+              <span className="text-ok" aria-hidden>✓</span>
+              <span>{r}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {profile.bio && <p className="leading-relaxed text-snow/90">{profile.bio}</p>}
+      <Chips label="Skills" tags={profile.skillTags} tone="hi" />
+      <Chips label="Vibe" tags={profile.styleTags} tone="sky" />
+      <Chips label="Looking for" tags={profile.lookingFor} tone="ghost" />
+    </section>
+  );
+
+  const blocks: React.ReactNode[] = [];
+  for (let i = 0; i < rounds; i++) {
+    if (photos[i]) blocks.push(<Photo key={`ph${i}`} src={photos[i]} alt={`${profile.name}, photo ${i + 1}`} />);
+    else if (i === 0) blocks.push(<NoPhoto key="nophoto" profile={profile} />);
+    if (prompts[i]) blocks.push(<PromptBlock key={`pr${i}`} question={prompts[i].question} answer={prompts[i].answer} />);
+    if (i === 0) blocks.push(about);
+  }
+
   return (
-    <article className="overflow-hidden rounded-3xl border border-edge bg-slab text-snow">
-      {/* Name badge */}
-      <header className="relative bg-badge text-ink">
-        <span aria-hidden className="absolute left-1/2 top-2.5 h-2.5 w-14 -translate-x-1/2 rounded-full bg-floor" />
-        <div className={`${bandFor(profile.id)} px-5 pb-2.5 pt-7`}>
-          <span className="block font-display text-xl font-black leading-none">hello</span>
-          <span className="block text-xs font-semibold">my name is</span>
+    <article className="space-y-3 rounded-3xl bg-floor p-3 text-snow">
+      <header className="flex items-start justify-between gap-3 px-2 pt-2">
+        <div className="min-w-0">
+          <h2 className="font-display text-3xl font-black leading-tight">{profile.name}</h2>
+          {profile.tagline && <p className="mt-1 leading-snug text-dim">{profile.tagline}</p>}
+          <span className="mt-2 inline-block rounded-full border border-edge px-2.5 py-0.5 font-mono text-[11px] font-semibold text-snow">
+            {hackathonLabel(profile.hackathonCount)}
+          </span>
         </div>
-        <div className="flex items-center gap-4 px-5 py-5">
-          <UiAvatar profile={profile} size={80} className="border-2 border-ink/10 !bg-white !text-ink" />
-          <div className="min-w-0 flex-1">
-            <h2 className="font-display text-2xl font-black leading-tight">{profile.name}</h2>
-            {profile.tagline && <p className="mt-1 text-sm leading-snug text-ink/70">{profile.tagline}</p>}
-            <span className="mt-2 inline-block rounded-full bg-ink px-2.5 py-0.5 font-mono text-[11px] font-semibold text-badge">
-              {hackathonLabel(profile.hackathonCount)}
-            </span>
-          </div>
-        </div>
-        {compat && <ScoreSticker score={compat.score} className="absolute right-4 top-10 rotate-6 text-base" />}
+        {compat && <ScoreSticker score={compat.score} className="mt-1 shrink-0 rotate-6 text-base" />}
       </header>
-
-      <div className="space-y-5 p-5">
-        {compat && compat.reasons.length > 0 && (
-          <ul className="space-y-1.5 rounded-2xl border border-ok/30 bg-ok/5 p-4 text-sm">
-            {compat.reasons.map((r) => (
-              <li key={r} className="flex gap-2">
-                <span className="text-ok" aria-hidden>✓</span>
-                <span>{r}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {profile.bio && <p className="leading-relaxed text-snow/90">{profile.bio}</p>}
-
-        <Chips label="Skills" tags={profile.skillTags} tone="hi" />
-        <Chips label="Vibe" tags={profile.styleTags} tone="sky" />
-        <Chips label="Looking for" tags={profile.lookingFor} tone="ghost" />
-
-        {profile.prompts.length > 0 && (
-          <div className="space-y-3">
-            {profile.prompts.map((p) => (
-              <div key={p.question} className="rounded-2xl border border-edge bg-floor p-4">
-                <div className="text-sm text-dim">{p.question}</div>
-                <div className="mt-1.5 font-display text-lg font-bold leading-snug">{p.answer}</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {blocks}
     </article>
+  );
+}
+
+/** Full-width 4:5 photo, like Hinge. */
+function Photo({ src, alt }: { src: string; alt: string }) {
+  return (
+    <div className="overflow-hidden rounded-2xl bg-slab">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} draggable={false} className="aspect-[4/5] w-full object-cover" />
+    </div>
+  );
+}
+
+/** No photos yet: a big name badge instead of an empty hole. */
+function NoPhoto({ profile }: { profile: Profile }) {
+  return (
+    <div className={`${bandFor(profile.id)} grid aspect-[4/3] place-items-center rounded-2xl text-ink`}>
+      <div className="text-center">
+        <span className="block font-display text-7xl font-black leading-none">{initials(profile.name)}</span>
+        <span className="mt-3 block text-sm font-semibold">No photo. Very mysterious. Very hackerman.</span>
+      </div>
+    </div>
+  );
+}
+
+/** Hinge's big prompt card, on name-badge paper. */
+function PromptBlock({ question, answer }: { question: string; answer: string }) {
+  return (
+    <div className="rounded-2xl bg-badge px-6 pb-8 pt-7 text-ink">
+      <div className="text-sm font-semibold text-ink/70">{question}</div>
+      <div className="mt-3 font-display text-2xl font-black leading-[1.15] sm:text-3xl">{answer}</div>
+    </div>
   );
 }
