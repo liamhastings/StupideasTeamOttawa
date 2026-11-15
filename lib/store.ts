@@ -3,7 +3,7 @@
 // Locally: JSON file at data/db.json (gitignored).
 // On Vercel: the project folder is read-only, so we keep the DB in memory and
 // mirror it to /tmp (writable, but per-instance and wiped on cold start).
-// Good enough for a demo; swap readDB/writeDB for Supabase etc. later.
+// Good enough for a demo; swap readDB/writeDB for a real database later.
 //
 // Seed profiles always come from data/seed.ts (ids start with "seed_"), so
 // editing the seed file shows up without deleting db.json.

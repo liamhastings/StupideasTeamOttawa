@@ -1,6 +1,20 @@
 import type { Profile } from "../lib/types";
 import { avatar, SKIN } from "./avatars";
 
+// ─── HOW TO ADD / EDIT A DEMO HACKER ─────────────────────────────────────────
+// 1. Put their photo in public/avatars/ (square, under ~300 KB), e.g. mia.jpg
+// 2. Copy a profile below and edit it. Use  avatarUrl: photo("mia.jpg")
+//    (or keep the drawn avatar({...}) one, or delete avatarUrl to use the emoji).
+// 3. Keep the id starting with "seed_" and unique (seed_11, seed_12, ...).
+// 4. styleTags / skillTags / lookingFor must be copied exactly from lib/tags.ts,
+//    otherwise matching can't score them.
+// 5. prompts: up to 3. handle is what a match gets to see.
+// Save and refresh: the dev server picks it up, no database reset needed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** A photo you dropped into public/avatars/. */
+const photo = (file: string) => `/avatars/${file}`;
+
 // 10 demo hackers with illustrated profile pictures. Ids must keep the "seed_"
 // prefix (the store refreshes them from this file; Kailen's demo rigging only
 // forges likes from seed profiles). Skills are spread out on purpose so every
@@ -32,7 +46,7 @@ export const SEED_PROFILES: Profile[] = [
     name: "Mia Matcha",
     handle: "@matchamia",
     avatarEmoji: "🧋",
-    avatarUrl: avatar({ bg: "#3ddc97", skin: SKIN.light, hair: "bun", hairColor: "#6b3e26", shirt: "#f2f4fb", mouth: "smile", blush: true, prop: "🍵" }),
+    avatarUrl: photo("zz-test.svg") || avatar({ bg: "#3ddc97", skin: SKIN.light, hair: "bun", hairColor: "#6b3e26", shirt: "#f2f4fb", mouth: "smile", blush: true, prop: "🍵" }),
     tagline: "Matcha first. Merge conflicts later.",
     bio: "Product designer who judges your font choices silently, then loudly. Can turn a cursed wireframe into something a VC would frame. Brings her own whisk.",
     styleTags: ["matcha enjoyer", "light mode psychopath", "organized chaos"],
