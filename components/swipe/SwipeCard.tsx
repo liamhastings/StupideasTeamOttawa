@@ -37,7 +37,7 @@ export default function SwipeCard({ item, index, exitDir, onSwipe }: SwipeCardPr
 
   return (
     <motion.div
-      className={`relative col-start-1 row-start-1 select-none ${isTop ? "cursor-grab active:cursor-grabbing" : "pointer-events-none"}`}
+      className={`relative col-start-1 row-start-1 select-none text-snow ${isTop ? "cursor-grab active:cursor-grabbing" : "pointer-events-none"}`}
       style={isTop ? { x, rotate, zIndex: 10 } : { zIndex: 10 - index }}
       drag={isTop ? "x" : false}
       dragSnapToOrigin

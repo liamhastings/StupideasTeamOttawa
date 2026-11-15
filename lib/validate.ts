@@ -40,7 +40,7 @@ export function validateProfileInput(
     value: {
       name,
       handle,
-      avatarEmoji: str(b.avatarEmoji, 8) || "🧑‍💻",
+      avatarEmoji: str(b.avatarEmoji, 8),
       avatarUrl,
       tagline: str(b.tagline, 120),
       bio: str(b.bio, 400),

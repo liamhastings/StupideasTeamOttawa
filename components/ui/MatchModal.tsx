@@ -3,15 +3,16 @@ import Avatar from "./Avatar";
 import Button from "./Button";
 import Modal from "./Modal";
 
-type Props = { open: boolean; onClose: () => void; meEmoji: string; otherEmoji: string; otherName: string; chatHref: string };
+type Who = { name?: string; avatarUrl?: string };
+type Props = { open: boolean; onClose: () => void; me: Who; other: Who; otherName: string; chatHref: string };
 
-export default function MatchModal({ open, onClose, meEmoji, otherEmoji, otherName, chatHref }: Props) {
+export default function MatchModal({ open, onClose, me, other, otherName, chatHref }: Props) {
   return (
     <Modal open={open} onClose={onClose}>
       <div className="py-4 text-center">
         <div className="flex justify-center">
-          <span className="merge-left"><Avatar emoji={meEmoji} size={88} ring /></span>
-          <span className="merge-right"><Avatar emoji={otherEmoji} size={88} ring /></span>
+          <span className="merge-left"><Avatar profile={me} size={88} ring /></span>
+          <span className="merge-right"><Avatar profile={other} size={88} ring /></span>
         </div>
         <h2 className="mt-8 font-display text-3xl font-black leading-tight">It&apos;s a match.</h2>
         <p className="mx-auto mt-3 max-w-xs text-dim">

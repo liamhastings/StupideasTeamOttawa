@@ -58,7 +58,6 @@ export default function ProfilePage() {
   if (missing)
     return (
       <div className="px-5 py-16 text-center">
-        <p className="text-5xl" aria-hidden>👻</p>
         <h1 className="mt-4 font-display text-2xl font-black">404: personality not found</h1>
         <p className="mx-auto mt-2 max-w-xs text-dim">Your profile ghosted you. Someone probably reset the database.</p>
         <Button className="mt-6" onClick={startOver}>Make a new one</Button>
@@ -98,7 +97,7 @@ export default function ProfilePage() {
           <p className="text-xs text-dim">Contact handle, shown only after a match</p>
           <p className="truncate font-mono text-snow">{profile.handle}</p>
         </div>
-        <span aria-hidden className="text-xl">🔒</span>
+        <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-dim"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
       </div>
 
       <div className="pt-4 text-center">

@@ -52,7 +52,7 @@ export default function MatchesPage() {
             {fresh.map(({ match, other }) => (
               <li key={match.id} className="shrink-0">
                 <Link href={`/matches/${match.id}/chat`} className="flex w-16 flex-col items-center gap-1.5">
-                  <Avatar emoji={other.avatarEmoji} size={60} ring />
+                  <Avatar profile={other} size={60} ring />
                   <span className="w-full truncate text-center text-xs">{other.name.split(" ")[0]}</span>
                 </Link>
               </li>
@@ -67,7 +67,7 @@ export default function MatchesPage() {
           {sorted.map(({ match, other, compat, last }) => (
             <li key={match.id}>
               <Link href={`/matches/${match.id}/chat`} className="flex items-center gap-3 px-4 py-3 hover:bg-slab">
-                <Avatar emoji={other.avatarEmoji} size={52} />
+                <Avatar profile={other} size={52} />
                 <div className="min-w-0 flex-1">
                   <p className="flex items-baseline justify-between gap-2">
                     <b className="truncate">{other.name}</b>
