@@ -2,7 +2,6 @@
 
 import { AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { HeartIcon } from "@/components/ui/Icons";
 import SwipeCard from "./SwipeCard";
 import type { DeckItem, SwipeAction } from "./types";
 
@@ -75,21 +74,19 @@ export default function SwipeDeck({ deck, onSwipe, disabled = false }: SwipeDeck
       </div>
 
       {/* Sticky just above Ian's fixed TabBar (~4.25rem) so the buttons are never hidden on short phones. */}
-      <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-20 flex w-full items-end justify-center gap-10 bg-gradient-to-t from-floor via-floor/90 to-transparent pb-1 pt-4">
+      <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-20 flex w-full items-end justify-center gap-6 bg-gradient-to-t from-white via-white/90 to-transparent pb-1 pt-4 font-mono">
         <div className="flex flex-col items-center gap-2">
           <button
             type="button"
             onClick={() => swipe("pass")}
             disabled={disabled || deck.length === 0}
             aria-label="Pass on this hacker (left arrow)"
-            className="grid h-16 w-16 place-items-center rounded-full border-2 border-ship/60 bg-slab text-ship transition hover:bg-ship/10 active:scale-95 disabled:pointer-events-none disabled:opacity-50"
+            className="border-2 border-[#111] bg-white px-5 py-3 text-lg font-black text-[#111] shadow-[4px_4px_0_#111] transition active:translate-x-1 active:translate-y-1 active:shadow-none disabled:pointer-events-none disabled:opacity-40"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" className="h-7 w-7" aria-hidden>
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
+            [ X ]
           </button>
-          <span className="font-mono text-xs text-dim" aria-hidden>
-            <kbd className="rounded border border-edge px-1">←</kbd> git rm
+          <span className="text-xs text-neutral-500" aria-hidden>
+            <kbd className="border border-neutral-400 px-1">&lt;-</kbd> git rm
           </span>
         </div>
         <div className="flex flex-col items-center gap-2">
@@ -98,12 +95,12 @@ export default function SwipeDeck({ deck, onSwipe, disabled = false }: SwipeDeck
             onClick={() => swipe("like")}
             disabled={disabled || deck.length === 0}
             aria-label="Like this hacker (right arrow)"
-            className="grid h-20 w-20 place-items-center rounded-full bg-hi text-ink shadow-lg shadow-hi/20 transition hover:brightness-95 active:scale-95 disabled:pointer-events-none disabled:opacity-50"
+            className="border-2 border-[#111] bg-[#111] px-6 py-3 text-lg font-black text-white shadow-[4px_4px_0_#888] transition active:translate-x-1 active:translate-y-1 active:shadow-none disabled:pointer-events-none disabled:opacity-40"
           >
-            <HeartIcon className="h-9 w-9" />
+            [ &lt;3 ]
           </button>
-          <span className="font-mono text-xs text-dim" aria-hidden>
-            git merge <kbd className="rounded border border-edge px-1">→</kbd>
+          <span className="text-xs text-neutral-500" aria-hidden>
+            git merge <kbd className="border border-neutral-400 px-1">-&gt;</kbd>
           </span>
         </div>
       </div>

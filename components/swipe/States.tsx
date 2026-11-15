@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Button from "@/components/ui/Button";
+import Link from "next/link";
 
 const LOADING_LINES = [
   "Compiling your soulmates…",
@@ -20,9 +20,9 @@ export function LoadingState() {
   }, []);
   return (
     <div className="mt-2" role="status" aria-live="polite">
-      <div className="h-80 animate-pulse rounded-2xl border border-edge bg-slab" />
-      <p className="mt-5 text-center font-mono text-sm text-dim">
-        <span className="text-hi">$</span> {LOADING_LINES[i]}
+      <div className="h-80 animate-pulse border-2 border-dashed border-neutral-300 bg-neutral-100" />
+      <p className="mt-5 text-center font-mono text-sm text-neutral-500">
+        <span className="font-bold text-[#111]">$</span> {LOADING_LINES[i]}
       </p>
     </div>
   );
@@ -31,14 +31,14 @@ export function LoadingState() {
 export function EmptyState({ onRefresh }: { onRefresh: () => void }) {
   return (
     <div className="px-2 py-16 text-center">
-      <div className="text-6xl" aria-hidden>🌱</div>
-      <h2 className="mt-6 font-display text-xl font-extrabold leading-tight">
+      <pre className="text-sm font-bold leading-tight" aria-hidden>{"  \\|/\n  \\|/\n ,_|_,\n  ~~~"}</pre>
+      <h2 className="mt-6 font-mono text-lg font-black leading-tight">
         You&apos;ve swiped on every hacker in a 10 mile radius.
       </h2>
-      <p className="mt-3 font-display text-2xl font-black text-ok">Touch grass.</p>
+      <p className="mt-3 font-mono text-2xl font-black">Touch grass.</p>
       <div className="mt-8 flex flex-col gap-2">
-        <Button href="/matches">See your matches</Button>
-        <Button variant="ghost" onClick={onRefresh}>Check for new hackers</Button>
+        <Link href="/matches" className="border-2 border-[#111] px-4 py-3 text-center font-mono text-sm font-bold uppercase bg-[#111] text-white">[ See your matches ]</Link>
+        <button type="button" onClick={onRefresh} className="border-2 border-[#111] px-4 py-3 text-center font-mono text-sm font-bold uppercase bg-white text-[#111]">[ Check for new hackers ]</button>
       </div>
     </div>
   );
@@ -47,12 +47,12 @@ export function EmptyState({ onRefresh }: { onRefresh: () => void }) {
 export function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <div className="px-2 py-16 text-center" role="alert">
-      <div className="text-6xl" aria-hidden>💥</div>
-      <h2 className="mt-6 font-display text-xl font-extrabold leading-tight">
+      <pre className="text-sm font-bold leading-tight" aria-hidden>{"  ___\n |x_x|\n |___|"}</pre>
+      <h2 className="mt-6 font-mono text-lg font-black leading-tight">
         Segmentation fault in the love department.
       </h2>
-      <p className="mx-auto mt-3 max-w-xs break-words font-mono text-sm text-ship">{message}</p>
-      <Button onClick={onRetry} className="mt-8">Turn it off and on again</Button>
+      <p className="mx-auto mt-3 max-w-xs break-words font-mono text-sm font-bold">{message}</p>
+      <button type="button" onClick={onRetry} className="mt-8 border-2 border-[#111] px-4 py-3 text-center font-mono text-sm font-bold uppercase bg-[#111] text-white">[ Turn it off and on again ]</button>
     </div>
   );
 }

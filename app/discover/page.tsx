@@ -140,15 +140,15 @@ export default function DiscoverPage() {
 
   return (
     // Ian's AppShell already provides <main>, the top bar and the tab bar (and bottom padding).
-    <div className="overflow-x-clip px-4 pt-5">
-      <header className="mb-4 flex items-end justify-between gap-3">
+    <div className="mx-3 mt-4 overflow-x-clip border-2 border-[#111] bg-white px-4 pb-6 pt-4 font-mono text-[#111] shadow-[6px_6px_0_#111]">
+      <header className="mb-4 flex items-end justify-between gap-3 border-b-2 border-dashed border-neutral-300 pb-3">
         <div>
-          <h1 className="font-display text-2xl font-extrabold">Discover</h1>
-          <p className="mt-1 text-sm text-dim">Right to merge. Left to git rm. No take-backs.</p>
+          <h1 className="text-2xl font-black">{"// discover"}</h1>
+          <p className="mt-1 text-xs text-neutral-500">$ right = git merge. left = git rm. no undo.</p>
         </div>
         {phase === "ready" && deck.length > 0 && (
-          <span className="shrink-0 rounded-full border border-edge px-3 py-1 font-mono text-xs text-dim" aria-live="polite">
-            <span className="text-hi">{deck.length}</span> in queue
+          <span className="shrink-0 border-2 border-[#111] px-2 py-0.5 text-xs font-bold" aria-live="polite">
+            [{deck.length} in queue]
           </span>
         )}
       </header>

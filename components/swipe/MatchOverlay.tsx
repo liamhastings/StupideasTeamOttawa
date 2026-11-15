@@ -3,8 +3,7 @@
 import { animate, motion, useIsPresent, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import UiAvatar from "@/components/ui/Avatar";
-import Button from "@/components/ui/Button";
+import { sweatLevel } from "@/lib/scoring";
 import type { Match } from "@/lib/types";
 import type { DeckItem } from "./types";
 
@@ -19,31 +18,40 @@ export interface MatchOverlayProps {
   onClose: () => void;
 }
 
-const CONFETTI = ["🎉", "🤝", "💻", "☕", "🔥", "🦆", "🍕", "✨", "👾", "🚀", "🧋", "💾"];
-const PIECES = 28;
+const ART = [" __  __     _     _____   ____  _   _  _ ", "|  \\/  |   / \\   |_   _| / ___|| | | || |", "| |\\/| |  / _ \\    | |  | |    | |_| || |", "| |  | | / ___ \\   | |  | |___ |  _  ||_|", "|_|  |_|/_/   \\_\\  |_|   \\____||_| |_|(_)"];
+// ASCII confetti: black and grey on white paper.
+const CONFETTI = ["*", "+", "#", "@", "%", "~", "/", "\\", "<3", "0x0", "{}", "&&"];
+const PIECES = 26;
 
 // Built once per overlay mount (lazy state initializer), so renders stay pure.
 function makeConfetti() {
   return Array.from({ length: PIECES }, (_, i) => ({
-    emoji: CONFETTI[i % CONFETTI.length],
+    glyph: CONFETTI[i % CONFETTI.length],
     left: Math.random() * 100,
     delay: Math.random() * 1.2,
     duration: 2.2 + Math.random() * 2,
-    size: 18 + Math.random() * 22,
+    size: 14 + Math.random() * 14,
     drift: (Math.random() - 0.5) * 120,
+    grey: i % 3 === 0,
   }));
 }
 
-function Avatar({ emoji, label, from }: { emoji: string; label: string; from: number }) {
+// "Dr. Dan Moreau" is Dan, not Dr.
+const firstName = (n: string) => n.trim().split(/\s+/).find((w) => !/^(dr|mr|mrs|ms|prof)\.?$/i.test(w)) ?? "";
+const meter = (n: number) => "#".repeat(n) + "-".repeat(10 - n);
+
+function Hacker({ emoji, label, from }: { emoji: string; label: string; from: number }) {
   return (
     <motion.div
-      initial={{ x: from, opacity: 0, rotate: from > 0 ? 25 : -25 }}
-      animate={{ x: 0, opacity: 1, rotate: 0 }}
-      transition={{ type: "spring", stiffness: 160, damping: 12, delay: 0.15 }}
+      initial={{ x: from, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 160, damping: 14, delay: 0.15 }}
       className="flex flex-col items-center gap-2"
     >
-      <UiAvatar emoji={emoji} size={96} ring />
-      <span className="max-w-[7rem] truncate text-xs font-semibold text-snow">{label}</span>
+      <div className="grid h-20 w-20 place-items-center border-2 border-[#111] bg-white text-4xl shadow-[4px_4px_0_#111]">
+        {emoji}
+      </div>
+      <span className="max-w-[7rem] truncate font-mono text-xs font-bold text-[#111]">{label}</span>
     </motion.div>
   );
 }
@@ -59,6 +67,7 @@ export default function MatchOverlay({ item, match, me, onClose }: MatchOverlayP
   const dialogRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   const { profile, compat } = item;
+  const sweat = sweatLevel(profile);
 
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -79,7 +88,7 @@ export default function MatchOverlay({ item, match, me, onClose }: MatchOverlayP
   // Focus the primary action, close on Escape, and keep Tab inside the dialog.
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null; // read BEFORE we steal focus
-    dialogRef.current?.querySelector<HTMLElement>('a[href="/matches"]')?.focus({ preventScroll: true }); // keep the title in view // "Go to Matches"
+    dialogRef.current?.querySelector<HTMLElement>('a[href="/matches"]')?.focus({ preventScroll: true }); // "Go to Matches"
     const onKey = (e: KeyboardEvent) => {
       if (!presentRef.current) return;
       if (e.key === "Escape") {
@@ -111,9 +120,11 @@ export default function MatchOverlay({ item, match, me, onClose }: MatchOverlayP
     };
   }, []);
 
+  const first = firstName(profile.name) || "Your new teammate";
+
   return (
     <motion.div
-      className={`fixed inset-0 z-50 flex justify-center overflow-y-auto overscroll-contain bg-floor/90 px-4 py-6 backdrop-blur-sm ${isPresent ? "" : "pointer-events-none"}`}
+      className={`fixed inset-0 z-50 flex justify-center overflow-y-auto overscroll-contain bg-white px-4 py-6 font-mono text-[#111] ${isPresent ? "" : "pointer-events-none"}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -124,13 +135,13 @@ export default function MatchOverlay({ item, match, me, onClose }: MatchOverlayP
           {confetti.map((c, i) => (
             <motion.span
               key={i}
-              className="absolute top-0"
+              className={`absolute top-0 font-bold ${c.grey ? "text-neutral-400" : "text-[#111]"}`}
               style={{ left: `${c.left}%`, fontSize: c.size }}
               initial={{ y: -60, opacity: 1, rotate: 0 }}
-              animate={{ y: "105vh", x: c.drift, opacity: [1, 1, 0.8], rotate: 540 }}
+              animate={{ y: "105vh", x: c.drift, opacity: [1, 1, 0.8], rotate: 360 }}
               transition={{ duration: c.duration, delay: c.delay, ease: "easeIn", repeat: Infinity, repeatDelay: 0.4 }}
             >
-              {c.emoji}
+              {c.glyph}
             </motion.span>
           ))}
         </div>
@@ -144,75 +155,95 @@ export default function MatchOverlay({ item, match, me, onClose }: MatchOverlayP
         className="relative z-10 my-auto flex w-full max-w-md flex-col items-center gap-5 text-center"
         onClick={(e) => e.stopPropagation()}
       >
-        <motion.h2
-          id="match-title"
-          initial={{ scale: 0.2, rotate: -12, opacity: 0 }}
-          animate={reduceMotion ? { scale: 1, rotate: -3, opacity: 1 } : { scale: [0.2, 1.25, 1], rotate: [-12, 4, -3], opacity: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="rounded-xl bg-hi px-5 py-2 font-display text-4xl font-black uppercase leading-none tracking-tight text-ink shadow-[0_0_60px_rgba(255,225,77,0.35)] sm:text-5xl"
+        <h2 id="match-title" className="sr-only">It&apos;s a match!</h2>
+        <motion.pre
+          aria-hidden
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="max-w-full overflow-hidden text-[9px] font-bold leading-[1.1] sm:text-xs"
         >
-          It&apos;s a match!
-        </motion.h2>
+          {ART.join("\n")}
+        </motion.pre>
 
-        <p className="max-w-full break-all font-mono text-sm text-ok">
-          <span className="text-dim">$</span> git merge {profile.name.split(" ")[0].toLowerCase().replace(/[^a-z0-9]/g, "") || "teammate"}
-          <span className="ml-1 animate-pulse">▍</span>
+        <p className="max-w-full break-all text-sm">
+          <span className="text-neutral-400">$</span> git merge {firstName(profile.name).toLowerCase().replace(/[^a-z0-9]/g, "") || "teammate"}
+          <span className="ml-1 animate-pulse">_</span>
         </p>
 
         <div className="flex items-center gap-3">
-          <Avatar emoji={me.avatarEmoji} label={me.name} from={-160} />
+          <Hacker emoji={me.avatarEmoji} label={me.name} from={-160} />
           <motion.span
             initial={{ scale: 0 }}
-            animate={reduceMotion ? { scale: 1 } : { scale: [0, 1.6, 1], rotate: [0, 20, -10, 0] }}
-            transition={{ delay: 0.55, duration: 0.6 }}
-            className="text-4xl"
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.55, type: "spring", stiffness: 300, damping: 14 }}
+            className="text-2xl font-black"
             aria-hidden
           >
-            🤝
+            &lt;=&gt;
           </motion.span>
-          <Avatar emoji={profile.avatarEmoji} label={profile.name} from={160} />
+          <Hacker emoji={profile.avatarEmoji} label={profile.name} from={160} />
         </div>
 
-        <div>
-          {/* Same "laptop sticker" as Ian's BadgeTile fit score, just enormous. */}
-          <div
-            className="rotate-3 rounded-xl border-2 border-hi bg-ink px-5 py-2 font-display text-5xl font-black text-hi"
-            role="img"
-            aria-label={`${compat.score} percent fit`}
-          >
-            <span aria-hidden>{shownScore}% fit</span>
+        {/* One boxed readout: how well you fit, how cracked they are, why. */}
+        <div className="w-full border-2 border-[#111] bg-white text-left shadow-[6px_6px_0_#111]">
+          <div className="border-b-2 border-[#111] bg-[#111] px-3 py-1 text-xs text-white">
+            +-- merge-request.log --+ <span className="text-neutral-400">0 conflicts</span>
+          </div>
+          <div className="space-y-3 p-4">
+            <div className="flex items-end justify-between gap-3">
+              <span className="text-xs uppercase tracking-wider text-neutral-500">compatibility</span>
+              <div role="img" aria-label={`${compat.score} percent fit`} className="text-5xl font-black leading-none">
+                <span aria-hidden>[{String(shownScore).padStart(2, " ")}%]</span>
+              </div>
+            </div>
+            <div>
+              <div className="flex items-baseline justify-between text-xs">
+                <span className="uppercase tracking-wider text-neutral-500">sweat level</span>
+                <span className="font-bold">{sweat}/10 cracked</span>
+              </div>
+              <div role="img" aria-label={`Sweat level ${sweat} out of 10`} className="mt-1 text-lg font-bold tracking-[0.15em]">
+                <span aria-hidden>[{meter(sweat)}]</span>
+              </div>
+            </div>
+            <ul className="space-y-1.5 border-t-2 border-dashed border-neutral-300 pt-3 text-sm">
+              {compat.reasons.map((r, i) => (
+                <motion.li
+                  key={`${i}-${r}`}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.0 + i * 0.25 }}
+                  className="flex gap-2"
+                >
+                  <span className="font-bold" aria-hidden>&gt;</span>
+                  <span>{r}</span>
+                </motion.li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        <ul className="w-full space-y-2">
-          {compat.reasons.map((r, i) => (
-            <motion.li
-              key={`${i}-${r}`}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 + i * 0.25 }}
-              className="flex gap-2 rounded-xl border border-edge bg-slab px-3 py-2 text-left text-sm text-snow"
-            >
-              <span className="font-mono text-ok" aria-hidden>✓</span>
-              <span>{r}</span>
-            </motion.li>
-          ))}
-        </ul>
-
-        <p className="text-sm text-dim">
-          Merge request approved, 0 conflicts. {profile.name.trim().split(" ")[0] || "Your new teammate"}&apos;s handle is unlocked.{" "}
-          <Link href={`/matches/${match.id}/chat`} className="font-semibold text-hi underline-offset-2 hover:underline">
-            Say hi in chat →
+        <p className="text-sm text-neutral-600">
+          Merge request approved. {first}&apos;s handle is unlocked.{" "}
+          <Link href={`/matches/${match.id}/chat`} className="font-bold text-[#111] underline underline-offset-2">
+            say_hi --chat
           </Link>
         </p>
 
         <div className="flex w-full flex-col gap-3 sm:flex-row">
-          <Button href="/matches" className="flex-1 text-base uppercase">
-            Go to Matches
-          </Button>
-          <Button variant="ghost" onClick={onClose} className="flex-1 text-base">
-            Keep swiping
-          </Button>
+          <Link
+            href="/matches"
+            className="flex-1 border-2 border-[#111] bg-[#111] px-4 py-3 text-center text-sm font-bold uppercase text-white transition hover:bg-white hover:text-[#111] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111]"
+          >
+            [ Go to Matches ]
+          </Link>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 border-2 border-[#111] bg-white px-4 py-3 text-sm font-bold uppercase text-[#111] transition hover:bg-[#111] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#111]"
+          >
+            [ Keep swiping ]
+          </button>
         </div>
       </div>
     </motion.div>
