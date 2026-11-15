@@ -178,7 +178,7 @@ export const SEED_PROFILES: Profile[] = [
   // ─── Featured cast ───
   {
     id: "seed_11",
-    name: "Sam",
+    name: "Sam Altman",
     handle: "@sam_ships_it",
     avatarEmoji: "",
     ...mine("sam01.jpg", "sam02.jpg"),
@@ -237,7 +237,7 @@ export const SEED_PROFILES: Profile[] = [
     // The spy. Same handle as Kailen's chat bot (app/api/swipes/_bots.ts), so his
     // canned openers/replies kick in and ensureBots() won't create a duplicate.
     id: "seed_spy",
-    name: "Agent Sleeper",
+    name: "Chinese Spy",
     handle: "@agent_sleeper",
     avatarEmoji: "",
     tagline: "Definitely just here for the free shawarma.",
@@ -255,10 +255,12 @@ export const SEED_PROFILES: Profile[] = [
   },
 ];
 
-// Already liked each other, so the spy skips Discover and waits in Matches.
+// The spy and Jensen already liked each other, so the spy skips Discover and waits in Matches.
 export const SEED_SWIPES: Swipe[] = [
   { fromId: DEMO_USER_ID, toId: "seed_spy", action: "like" },
   { fromId: "seed_spy", toId: DEMO_USER_ID, action: "like" },
+  // Sam already liked Jensen, so he waits in the "Likes you" tab. Like him back = instant match.
+  { fromId: "seed_11", toId: DEMO_USER_ID, action: "like" },
 ];
 
 export const SEED_MATCHES: Match[] = [
