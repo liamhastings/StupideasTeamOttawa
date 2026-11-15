@@ -1,5 +1,6 @@
-import type { Profile } from "../lib/types";
+import type { Match, Profile, Swipe } from "../lib/types";
 import { avatar, SKIN, type AvatarSpec } from "./avatars";
+import { DEMO_USER_ID } from "../lib/session";
 
 // ─── HOW TO ADD / EDIT A DEMO HACKER ─────────────────────────────────────────
 // 1. Put their photo in public/avatars/ (square, under ~300 KB), e.g. mia.jpg
@@ -33,6 +34,10 @@ const pics = (spec: AvatarSpec, actionBg: string) => {
 // kind of user gets a good match: designer, pitcher, backend, ML, hardware,
 // frontend, security, PM, full-stack, and one wide-eyed newbie.
 const T = "2026-11-15T09:00:00.000Z";
+
+// Who you are during the demo: lib/session.ts logs every browser in as this
+// profile until someone onboards a new one.
+export { DEMO_USER_ID };
 
 export const SEED_PROFILES: Profile[] = [
   // ─── Real hackers (photos in public/avatars/). Handles are placeholders: edit them. ───
@@ -170,7 +175,80 @@ export const SEED_PROFILES: Profile[] = [
     createdAt: T,
   },
 
-  // ─── Drawn demo hackers (delete any you don't want) ───
+  // ─── Featured cast ───
+  {
+    id: "seed_11",
+    name: "Sam",
+    handle: "@sam_ships_it",
+    avatarEmoji: "",
+    ...mine("sam01.jpg", "sam02.jpg"),
+    tagline: "I will pitch your idea better than you can. Then ask what it does.",
+    bio: "The one in a suit at a hackathon. Has won two demo days on vibes and a firm handshake. Will turn your half-working prototype into a billion-dollar story, and your billion-dollar story into a slide.",
+    styleTags: ["ships on vibes", "demo-day gambler", "energy drink IV drip"],
+    skillTags: ["great at public speaking", "pitch deck artist", "prompt engineer"],
+    hackathonCount: 6,
+    lookingFor: ["backend brain", "devops / deploys"],
+    prompts: [
+      { question: "My hot take is…", answer: "Every demo is a pitch. Every bug is a feature." },
+      { question: "You should match with me if…", answer: "you build it and I make the judges believe it." },
+      { question: "My biggest red flag is…", answer: "I say 'we're pre-revenue' about everything, including lunch." },
+    ],
+    createdAt: T,
+  },
+  {
+    id: "demo_jensen",
+    name: "Jensen",
+    handle: "@jensen_needs_a_frontend",
+    avatarEmoji: "",
+    ...mine("jensen01.jpg", "jensen02.jpg"),
+    tagline: "Every problem is a GPU problem. Every answer is also a GPU.",
+    bio: "Wears the same leather jacket to every hackathon and it is never wrong. Owns more GPUs than the venue has outlets. Will train your model while you sleep, then announce it like a keynote.",
+    styleTags: ["demo-day gambler", "mechanical keyboard cultist", "stickers on laptop: 47"],
+    skillTags: ["ML / AI", "hardware / IoT", "great at public speaking"],
+    hackathonCount: 9,
+    lookingFor: ["frontend wizard", "can design in Figma"],
+    prompts: [
+      { question: "My hot take is…", answer: "Moore's Law isn't dead. It just needs more GPUs." },
+      { question: "At 3am you'll find me…", answer: "presenting our project like it's a keynote. With slides." },
+      { question: "My biggest red flag is…", answer: "I will say 'one more thing' and mean it." },
+    ],
+    createdAt: T,
+  },
+  {
+    // The spy. Same handle as Kailen's chat bot (app/api/swipes/_bots.ts), so his
+    // canned openers/replies kick in and ensureBots() won't create a duplicate.
+    id: "seed_spy",
+    name: "Agent Sleeper",
+    handle: "@agent_sleeper",
+    avatarEmoji: "",
+    tagline: "Definitely just here for the free shawarma.",
+    bio: "Wears a trench coat indoors. Asks very normal questions about your repo. Has photographed every whiteboard in the building. For memories.",
+    styleTags: ["headphones permanently on", "works best at 3am", "snack hoarder"],
+    skillTags: ["security / hacking", "backend brain", "devops / deploys", "can run on 2 hours of sleep"],
+    hackathonCount: 5,
+    lookingFor: ["ML / AI", "hardware / IoT"],
+    prompts: [
+      { question: "My most cursed commit message is…", answer: "fix: nothing to see here" },
+      { question: "At 3am you'll find me…", answer: "reading your source code. For fun. Normal fun." },
+      { question: "You should match with me if…", answer: "you have GPUs. Many GPUs. Where are they kept? Asking normally." },
+    ],
+    createdAt: T,
+  },
+];
+
+// Already liked each other, so the spy skips Discover and waits in Matches.
+export const SEED_SWIPES: Swipe[] = [
+  { fromId: DEMO_USER_ID, toId: "seed_spy", action: "like" },
+  { fromId: "seed_spy", toId: DEMO_USER_ID, action: "like" },
+];
+
+export const SEED_MATCHES: Match[] = [
+  { id: "seed_match_spy", userAId: DEMO_USER_ID, userBId: "seed_spy", score: 91, createdAt: T },
+];
+
+// Drawn demo hackers, not in the demo any more. Add  ...DRAWN_PROFILES  to
+// SEED_PROFILES to bring them back.
+export const DRAWN_PROFILES: Profile[] = [
   {
     id: "seed_01",
     name: "Dev 'sudo' Patel",
@@ -358,44 +436,6 @@ export const SEED_PROFILES: Profile[] = [
       { question: "My hot take is…", answer: "a Jira board at a hackathon is a power move." },
       { question: "You should match with me if…", answer: "you need someone to say 'blocker' with confidence." },
       { question: "My biggest red flag is…", answer: "I will make a Gantt chart for a 36-hour hackathon." },
-    ],
-    createdAt: T,
-  },
-  {
-    id: "seed_11",
-    name: "Sam",
-    handle: "@sam_ships_it",
-    avatarEmoji: "",
-    ...mine("sam01.jpg", "sam02.jpg"),
-    tagline: "I will pitch your idea better than you can. Then ask what it does.",
-    bio: "The one in a suit at a hackathon. Has won two demo days on vibes and a firm handshake. Will turn your half-working prototype into a billion-dollar story, and your billion-dollar story into a slide.",
-    styleTags: ["ships on vibes", "demo-day gambler", "energy drink IV drip"],
-    skillTags: ["great at public speaking", "pitch deck artist", "prompt engineer"],
-    hackathonCount: 6,
-    lookingFor: ["backend brain", "devops / deploys"],
-    prompts: [
-      { question: "My hot take is…", answer: "Every demo is a pitch. Every bug is a feature." },
-      { question: "You should match with me if…", answer: "you build it and I make the judges believe it." },
-      { question: "My biggest red flag is…", answer: "I say 'we're pre-revenue' about everything, including lunch." },
-    ],
-    createdAt: T,
-  },
-  {
-    id: "seed_12",
-    name: "Jensen",
-    handle: "@jensen_more_gpus",
-    avatarEmoji: "",
-    ...mine("jensen01.jpg", "jensen02.jpg"),
-    tagline: "Every problem is a GPU problem. Every answer is also a GPU.",
-    bio: "Wears the same leather jacket to every hackathon and it is never wrong. Owns more GPUs than the venue has outlets. Will train your model while you sleep, then announce it like a keynote.",
-    styleTags: ["demo-day gambler", "mechanical keyboard cultist", "stickers on laptop: 47"],
-    skillTags: ["ML / AI", "hardware / IoT", "great at public speaking"],
-    hackathonCount: 9,
-    lookingFor: ["frontend wizard", "can design in Figma"],
-    prompts: [
-      { question: "My hot take is…", answer: "Moore's Law isn't dead. It just needs more GPUs." },
-      { question: "At 3am you'll find me…", answer: "presenting our project like it's a keynote. With slides." },
-      { question: "My biggest red flag is…", answer: "I will say 'one more thing' and mean it." },
     ],
     createdAt: T,
   },

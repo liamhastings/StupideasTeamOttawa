@@ -40,4 +40,5 @@ export interface DB {
   profiles: Profile[];
   swipes: Swipe[];
   matches: Match[];
+  editedSeeds?: string[]; // seed profile ids edited in the app; their edits win over data/seed.ts
 }

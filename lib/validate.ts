@@ -26,9 +26,11 @@ export function validateProfileInput(
     .filter((p) => p.question && p.answer)
     .slice(0, 3);
   const count = Number(b.hackathonCount);
-  // Photos arrive as data URLs, resized client-side. Seed profiles skip this (they
-  // can use /avatars/ paths); user input must be real image data.
-  const isImage = (v: unknown): v is string => typeof v === "string" && /^data:image\/(png|jpeg|webp|gif);base64,/.test(v);
+  // Photos are data URLs resized client-side, or /avatars/ files (seed profiles
+  // being edited in the app keep their photo paths).
+  const isImage = (v: unknown): v is string =>
+    typeof v === "string" &&
+    (/^data:image\/(png|jpeg|webp|gif);base64,/.test(v) || /^\/avatars\/[\w.-]+\.(jpe?g|png|webp|gif|svg)$/i.test(v));
   const rawPhotos = Array.isArray(b.photos) ? b.photos.filter(Boolean).slice(0, 3) : [];
   if (rawPhotos.some((x) => !isImage(x)))
     return { ok: false, error: "That's not an image. That's a cry for help." };
