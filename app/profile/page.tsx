@@ -4,14 +4,23 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ProfileCard from "@/components/profile/ProfileCard";
 import ProfileForm, { type ProfileDraft } from "@/components/profile/ProfileForm";
+import Button from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
 import { clearUserId, getUserId } from "@/lib/session";
 import type { Profile } from "@/lib/types";
 
+function toDraft(p: Profile): ProfileDraft {
+  const draft: Partial<Profile> = { ...p };
+  delete draft.id;
+  delete draft.createdAt;
+  return draft as ProfileDraft;
+}
+
 export default function ProfilePage() {
   const router = useRouter();
+  const toast = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [editing, setEditing] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [missing, setMissing] = useState(false);
 
   useEffect(() => {
@@ -26,6 +35,11 @@ export default function ProfilePage() {
       .catch(() => setMissing(true));
   }, [router]);
 
+  function startOver() {
+    clearUserId();
+    router.push("/onboarding");
+  }
+
   async function save(draft: ProfileDraft): Promise<string | void> {
     if (!profile) return;
     const res = await fetch(`/api/profiles/${profile.id}`, {
@@ -37,69 +51,59 @@ export default function ProfilePage() {
     if (!res.ok) return data.error ?? "Save failed. Blame the intern.";
     setProfile(data);
     setEditing(false);
-    setSaved(true);
+    window.scrollTo({ top: 0 });
+    toast.push("Saved. You're now 3% more hireable.");
   }
 
   if (missing)
     return (
-      <main className="min-h-screen bg-neutral-950 p-8 text-center text-white">
-        <p className="text-5xl">👻</p>
-        <p className="mt-3">Your profile ghosted you (the database was reset).</p>
-        <button
-          className="mt-4 rounded-xl bg-fuchsia-600 px-5 py-2 font-bold"
-          onClick={() => { clearUserId(); router.push("/onboarding"); }}
-        >
-          Make a new one
-        </button>
-      </main>
+      <div className="px-5 py-16 text-center">
+        <p className="text-5xl" aria-hidden>👻</p>
+        <h1 className="mt-4 font-display text-2xl font-black">404: personality not found</h1>
+        <p className="mx-auto mt-2 max-w-xs text-dim">Your profile ghosted you. Someone probably reset the database.</p>
+        <Button className="mt-6" onClick={startOver}>Make a new one</Button>
+      </div>
     );
 
   if (!profile)
-    return <main className="min-h-screen bg-neutral-950 p-8 text-center text-neutral-400">Loading your personality…</main>;
+    return (
+      <div className="px-5 py-6" aria-busy>
+        <div className="h-72 animate-pulse rounded-3xl bg-slab" />
+        <p className="mt-4 text-center font-mono text-sm text-dim">Loading your personality…</p>
+      </div>
+    );
+
+  if (editing)
+    return (
+      <div className="px-5 py-6">
+        <h1 className="mb-6 font-display text-2xl font-black">Edit your badge</h1>
+        <ProfileForm mode="edit" submitLabel="Save changes" initial={toDraft(profile)} onSubmit={save} onCancel={() => setEditing(false)} />
+      </div>
+    );
 
   return (
-    <main className="min-h-screen bg-neutral-950 px-4 py-10">
-      <div className="mx-auto max-w-xl">
-        {editing ? (
-          <>
-            <h1 className="mb-6 text-3xl font-extrabold text-white">Edit your personality</h1>
-            <ProfileForm
-              mode="edit"
-              submitLabel="Save changes 💾"
-              initial={{
-                name: profile.name, handle: profile.handle, avatarEmoji: profile.avatarEmoji,
-                avatarUrl: profile.avatarUrl, tagline: profile.tagline, bio: profile.bio, styleTags: profile.styleTags,
-                skillTags: profile.skillTags, hackathonCount: profile.hackathonCount,
-                lookingFor: profile.lookingFor, prompts: profile.prompts,
-              }}
-              onSubmit={save}
-            />
-            <button onClick={() => setEditing(false)} className="mt-3 w-full text-sm text-neutral-400 underline">
-              Cancel
-            </button>
-          </>
-        ) : (
-          <>
-            <h1 className="mb-4 text-3xl font-extrabold text-white">This is you. Yikes.</h1>
-            {saved && <p className="mb-3 rounded-lg bg-emerald-500/15 p-3 text-sm text-emerald-300">✅ Saved. You&apos;re now 3% more hireable.</p>}
-            <ProfileCard profile={profile} />
-            <p className="mt-3 text-sm text-neutral-400">
-              Contact handle (only shown after a match): <span className="font-mono text-white">{profile.handle}</span>
-            </p>
-            <div className="mt-5 flex gap-3">
-              <button onClick={() => setEditing(true)} className="flex-1 rounded-xl bg-gradient-to-r from-fuchsia-600 to-orange-500 px-5 py-3 font-bold text-white">
-                Edit profile
-              </button>
-              <button
-                onClick={() => { clearUserId(); router.push("/onboarding"); }}
-                className="rounded-xl border border-white/20 px-5 py-3 font-semibold text-white hover:bg-white/10"
-              >
-                New identity
-              </button>
-            </div>
-          </>
-        )}
+    <div className="space-y-5 px-5 py-6">
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <p className="font-mono text-xs text-dim">your badge</p>
+          <h1 className="font-display text-2xl font-black">This is you. Yikes.</h1>
+        </div>
+        <Button variant="ghost" className="px-5 py-2 text-sm" onClick={() => setEditing(true)}>Edit</Button>
       </div>
-    </main>
+
+      <ProfileCard profile={profile} />
+
+      <div className="flex items-center justify-between gap-3 rounded-2xl border border-edge bg-slab px-4 py-3">
+        <div className="min-w-0">
+          <p className="text-xs text-dim">Contact handle, shown only after a match</p>
+          <p className="truncate font-mono text-snow">{profile.handle}</p>
+        </div>
+        <span aria-hidden className="text-xl">🔒</span>
+      </div>
+
+      <div className="pt-4 text-center">
+        <Button variant="danger" className="px-5 py-2 text-sm" onClick={startOver}>Burn it down, start a new identity</Button>
+      </div>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
 import type { Compat, Profile } from "@/lib/types";
+import { bandFor } from "@/components/ui/BadgeTile";
 
 export interface ProfileCardProps {
   profile: Profile;
@@ -6,138 +7,125 @@ export interface ProfileCardProps {
   compact?: boolean;
 }
 
-function scoreColor(score: number) {
-  if (score >= 80) return "text-emerald-300 border-emerald-400/60 bg-emerald-400/10";
-  if (score >= 50) return "text-amber-300 border-amber-400/60 bg-amber-400/10";
-  return "text-rose-300 border-rose-400/60 bg-rose-400/10";
+function hackathonLabel(n: number) {
+  if (n === 0) return "First hackathon";
+  if (n === 1) return "1 hackathon";
+  if (n < 10) return `${n} hackathons`;
+  return `${n} hackathons. Send help.`;
 }
 
-function hackathonBadge(n: number) {
-  if (n === 0) return "🌱 Hackathon virgin";
-  if (n === 1) return "🐣 1 hackathon";
-  if (n < 5) return `⚡ ${n} hackathons`;
-  if (n < 10) return `🔥 ${n} hackathons deep`;
-  return `🧓 ${n} hackathons. Send help.`;
-}
-
-function ScoreBadge({ compat }: { compat: Compat }) {
-  return (
-    <div
-      className={`flex shrink-0 flex-col items-center rounded-xl border px-2.5 py-1 font-mono ${scoreColor(compat.score)}`}
-      title="Teammate compatibility"
-    >
-      <span className="text-lg font-bold leading-tight">{compat.score}%</span>
-      <span className="text-[9px] uppercase tracking-wider opacity-80">compat</span>
-    </div>
-  );
-}
-
-// Uploaded photo if there is one, otherwise the emoji.
-export function Avatar({ profile, className }: { profile: Pick<Profile, "avatarEmoji" | "avatarUrl" | "name">; className: string }) {
+/** Uploaded photo if there is one, otherwise the emoji. Exported for teammates. */
+export function Avatar({
+  profile,
+  className = "",
+}: {
+  profile: Pick<Profile, "avatarEmoji" | "avatarUrl" | "name">;
+  className?: string;
+}) {
   if (profile.avatarUrl) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={profile.avatarUrl} alt={profile.name} className={`${className} object-cover`} />
+      <img src={profile.avatarUrl} alt={profile.name} className={`shrink-0 rounded-full object-cover ${className}`} />
     );
   }
-  return <span className={`${className} flex items-center justify-center`}>{profile.avatarEmoji}</span>;
+  return (
+    <span aria-hidden className={`grid shrink-0 place-items-center rounded-full ${className}`}>
+      {profile.avatarEmoji}
+    </span>
+  );
+}
+
+/** Fit score as a laptop sticker, same as Ian's BadgeTile. */
+function ScoreSticker({ score, className = "" }: { score: number; className?: string }) {
+  return (
+    <span className={`rounded-md bg-ink px-2 py-1 font-mono text-sm font-bold text-hi shadow-md ${className}`}>
+      {score}% fit
+    </span>
+  );
+}
+
+function Chips({ label, tags, tone }: { label: string; tags: string[]; tone: "hi" | "sky" | "ghost" }) {
+  if (!tags.length) return null;
+  const cls = {
+    hi: "bg-hi/10 text-hi border-hi/30",
+    sky: "bg-sky/10 text-sky border-sky/30",
+    ghost: "border-dashed border-edge text-dim",
+  }[tone];
+  return (
+    <section>
+      <h3 className="mb-2 font-mono text-[11px] uppercase tracking-widest text-dim">{label}</h3>
+      <ul className="flex flex-wrap gap-1.5">
+        {tags.map((t) => (
+          <li key={t} className={`rounded-full border px-3 py-1 text-[13px] font-medium ${cls}`}>{t}</li>
+        ))}
+      </ul>
+    </section>
+  );
 }
 
 export default function ProfileCard({ profile, compat, compact }: ProfileCardProps) {
   if (compact) {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-neutral-900 p-3 text-white">
-        <Avatar
-          profile={profile}
-          className="h-12 w-12 shrink-0 rounded-full bg-gradient-to-br from-fuchsia-600/40 to-orange-500/40 text-2xl"
-        />
+      <div className="flex items-center gap-3 rounded-2xl border border-edge bg-slab p-3">
+        <Avatar profile={profile} className="h-12 w-12 bg-floor text-2xl" />
         <div className="min-w-0 flex-1">
-          <div className="truncate font-semibold">{profile.name}</div>
-          <div className="truncate text-sm text-neutral-400">{profile.tagline}</div>
+          <div className="truncate font-display text-sm font-bold">{profile.name}</div>
+          <div className="truncate text-sm text-dim">{profile.tagline}</div>
         </div>
-        {compat && <ScoreBadge compat={compat} />}
+        {compat && <ScoreSticker score={compat.score} className="rotate-3" />}
       </div>
     );
   }
 
   return (
-    <article className="w-full overflow-hidden rounded-3xl border border-white/10 bg-neutral-900 text-white shadow-xl">
-      <header className="flex items-center gap-4 bg-gradient-to-br from-fuchsia-600/30 via-neutral-900 to-orange-500/20 p-5">
-        <Avatar
-          profile={profile}
-          className="h-20 w-20 shrink-0 rounded-full border border-white/20 bg-black/30 text-5xl"
-        />
-        <div className="min-w-0 flex-1">
-          <h2 className="truncate text-2xl font-extrabold tracking-tight">{profile.name}</h2>
-          <p className="text-sm text-neutral-300">{profile.tagline}</p>
-          <span className="mt-2 inline-block rounded-full border border-white/15 bg-black/30 px-2.5 py-0.5 text-xs font-medium">
-            {hackathonBadge(profile.hackathonCount)}
-          </span>
+    <article className="overflow-hidden rounded-3xl border border-edge bg-slab">
+      {/* Name badge */}
+      <header className="relative bg-badge text-ink">
+        <span aria-hidden className="absolute left-1/2 top-2.5 h-2.5 w-14 -translate-x-1/2 rounded-full bg-floor" />
+        <div className={`${bandFor(profile.id)} px-5 pb-2.5 pt-7`}>
+          <span className="block font-display text-xl font-black leading-none">hello</span>
+          <span className="block text-xs font-semibold">my name is</span>
         </div>
-        {compat && <ScoreBadge compat={compat} />}
+        <div className="flex items-center gap-4 px-5 py-5">
+          <Avatar profile={profile} className="h-20 w-20 border-2 border-ink/10 bg-white text-5xl" />
+          <div className="min-w-0 flex-1">
+            <h2 className="font-display text-2xl font-black leading-tight">{profile.name}</h2>
+            {profile.tagline && <p className="mt-1 text-sm leading-snug text-ink/70">{profile.tagline}</p>}
+            <span className="mt-2 inline-block rounded-full bg-ink px-2.5 py-0.5 font-mono text-[11px] font-semibold text-badge">
+              {hackathonLabel(profile.hackathonCount)}
+            </span>
+          </div>
+        </div>
+        {compat && <ScoreSticker score={compat.score} className="absolute right-4 top-10 rotate-6 text-base" />}
       </header>
 
-      <div className="space-y-4 p-5">
-        {profile.bio && <p className="text-sm leading-relaxed text-neutral-200">{profile.bio}</p>}
-
+      <div className="space-y-5 p-5">
         {compat && compat.reasons.length > 0 && (
-          <ul className="space-y-1 rounded-xl border border-pink-400/30 bg-pink-400/5 p-3 text-sm text-pink-200">
+          <ul className="space-y-1.5 rounded-2xl border border-ok/30 bg-ok/5 p-4 text-sm">
             {compat.reasons.map((r) => (
-              <li key={r}>💘 {r}</li>
+              <li key={r} className="flex gap-2">
+                <span className="text-ok" aria-hidden>✓</span>
+                <span>{r}</span>
+              </li>
             ))}
           </ul>
         )}
 
-        {profile.styleTags.length > 0 && (
-          <section>
-            <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-500">Vibe</h3>
-            <div className="flex flex-wrap gap-1.5">
-              {profile.styleTags.map((t) => (
-                <span key={t} className="rounded-full bg-fuchsia-500/15 px-2.5 py-1 text-xs text-fuchsia-200">
-                  {t}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
+        {profile.bio && <p className="leading-relaxed text-snow/90">{profile.bio}</p>}
 
-        {profile.skillTags.length > 0 && (
-          <section>
-            <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-500">Skills</h3>
-            <div className="flex flex-wrap gap-1.5">
-              {profile.skillTags.map((t) => (
-                <span key={t} className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs text-emerald-200">
-                  {t}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {profile.lookingFor.length > 0 && (
-          <section>
-            <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-widest text-neutral-500">
-              Looking for a teammate who is
-            </h3>
-            <div className="flex flex-wrap gap-1.5">
-              {profile.lookingFor.map((t) => (
-                <span key={t} className="rounded-full border border-orange-400/40 px-2.5 py-1 text-xs text-orange-200">
-                  {t}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
+        <Chips label="Skills" tags={profile.skillTags} tone="hi" />
+        <Chips label="Vibe" tags={profile.styleTags} tone="sky" />
+        <Chips label="Looking for" tags={profile.lookingFor} tone="ghost" />
 
         {profile.prompts.length > 0 && (
-          <section className="space-y-2">
+          <div className="space-y-3">
             {profile.prompts.map((p) => (
-              <div key={p.question} className="rounded-xl bg-white/5 p-3">
-                <div className="text-xs font-semibold text-neutral-400">{p.question}</div>
-                <div className="mt-0.5 text-base font-medium text-white">{p.answer}</div>
+              <div key={p.question} className="rounded-2xl border border-edge bg-floor p-4">
+                <div className="text-sm text-dim">{p.question}</div>
+                <div className="mt-1.5 font-display text-lg font-bold leading-snug">{p.answer}</div>
               </div>
             ))}
-          </section>
+          </div>
         )}
       </div>
     </article>

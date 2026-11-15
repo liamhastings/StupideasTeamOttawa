@@ -23,9 +23,5 @@ export default function OnboardingPage() {
     }
   }
 
-  return (
-    <main className="min-h-screen bg-neutral-950 px-4 py-10">
-      <ProfileForm mode="wizard" submitLabel="Start Grinding 🚀" onSubmit={create} />
-    </main>
-  );
+  return <ProfileForm mode="wizard" submitLabel="Print my badge" onSubmit={create} />;
 }
