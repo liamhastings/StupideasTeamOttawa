@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { getMatches, getProfiles } from "@/lib/store";
 import { score } from "@/lib/scoring";
+import { isRetired } from "../swipes/_bots";
 import { withSwipeLock } from "../swipes/_lock";
 import type { Compat, Match, Profile } from "@/lib/types";
 
@@ -29,7 +30,7 @@ export async function GET(req: Request) {
   for (const match of matches) {
     if (match.userAId !== userId && match.userBId !== userId) continue;
     const other = byId.get(match.userAId === userId ? match.userBId : match.userAId);
-    if (!other) continue; // match with a deleted profile: ghosted
+    if (!other || isRetired(other)) continue; // match with a deleted or retired profile: ghosted
     out.push({ match, other, compat: score(me, other) });
   }
   out.sort((x, y) => Date.parse(y.match.createdAt) - Date.parse(x.match.createdAt));

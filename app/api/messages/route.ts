@@ -10,7 +10,7 @@ import os from "node:os";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { getMatches, getProfile } from "@/lib/store";
-import { botReplies } from "../swipes/_bots";
+import { botOpeners, botReplies } from "../swipes/_bots";
 import { withSwipeLock } from "../swipes/_lock";
 
 interface ChatMessage {
@@ -53,7 +53,33 @@ export async function GET(req: Request) {
   const matchId = new URL(req.url).searchParams.get("matchId");
   if (!matchId) return err("matchId is required. Who are you even talking to?", 400);
   const now = Date.now();
-  const all = await withSwipeLock(readAll);
+  let all = await withSwipeLock(readAll);
+  // A brand-new match with a demo character: they message first, so the chat is never empty.
+  if (!all.some((m) => m.matchId === matchId)) {
+    const match = (await getMatches()).find((m) => m.id === matchId);
+    if (match) {
+      const [a, b] = await Promise.all([getProfile(match.userAId), getProfile(match.userBId)]);
+      const star = botOpeners(a) && !botOpeners(b) ? a : botOpeners(b) && !botOpeners(a) ? b : undefined;
+      const openers = botOpeners(star);
+      if (star && openers) {
+        await withSwipeLock(async () => {
+          const cur = await readAll();
+          if (cur.some((m) => m.matchId === matchId)) return; // someone else got there first
+          openers.forEach((text, i) =>
+            cur.push({
+              id: crypto.randomUUID(),
+              matchId,
+              fromId: star.id,
+              text,
+              createdAt: new Date(now - (openers.length - i) * 60_000).toISOString(),
+            }),
+          );
+          await writeAll(cur.slice(-2000));
+        });
+        all = await withSwipeLock(readAll);
+      }
+    }
+  }
   // Canned replies are stamped slightly in the future so they "arrive" after a typing delay.
   return NextResponse.json(all.filter((m) => m.matchId === matchId && Date.parse(m.createdAt) <= now).slice(-200));
 }

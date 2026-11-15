@@ -1,4 +1,4 @@
-// Two fictional demo characters for the chat demo. Created on demand (idempotent, by
+// A fictional demo character (Agent Sleeper) for the chat demo. Created on demand (idempotent, by
 // handle) through the store's own createProfile, so there is nothing to seed by hand and
 // it works on every machine. Their canned replies live here and are used by /api/messages.
 import { createProfile, getProfiles } from "@/lib/store";
@@ -10,30 +10,6 @@ interface Bot {
 }
 
 const BOTS: Bot[] = [
-  {
-    profile: {
-      name: "Leather Jacket Larry",
-      handle: "@leather_jacket_larry",
-      avatarEmoji: "",
-      tagline: "The more you merge, the more you save.",
-      bio: "Keynote veteran. Will announce your teammate in 4K at 120fps. Owns more GPUs than friends.",
-      styleTags: ["demo-day gambler", "ships on vibes", "stickers on laptop: 47"],
-      skillTags: ["great at public speaking", "hardware / IoT", "ML / AI", "pitch deck artist"],
-      hackathonCount: 12,
-      lookingFor: ["can design in Figma", "project manager"],
-      prompts: [
-        { question: "My hot take is…", answer: "Every problem is a GPU problem." },
-        { question: "My biggest red flag is…", answer: "I will say 'one more thing' at 3am." },
-      ],
-    },
-    replies: [
-      "The more you merge, the more you save.",
-      "Our team has 12,000 cores and zero design skills. Merge?",
-      "One more thing... I need snacks.",
-      "Impressive stack. But is it 4K at 120fps?",
-      "I'd merge teams, but only if we pitch it like a keynote.",
-    ],
-  },
   {
     profile: {
       name: "Agent Sleeper",
@@ -71,9 +47,45 @@ export async function ensureBots(): Promise<Profile[]> {
   return out;
 }
 
-/** Canned replies if this profile is a demo character, else undefined. */
-export function botReplies(p: Pick<Profile, "handle"> | undefined): string[] | undefined {
-  return p ? BOTS.find((b) => b.profile.handle === p.handle)?.replies : undefined;
-}
+// Lines for every featured demo character (the one created above plus Sam and Jensen, who are
+// hardcoded in data/seed.ts). Keyed by handle. `openers` is how they start the chat after you
+// match; `replies` is how they answer you.
+const LINES: Record<string, { openers: string[]; replies: string[] }> = {
+  "@agent_sleeper": {
+    openers: ["Hello, fellow hacker. I am also a hacker. Normal.", "Nice to meet you. Do not ask what is in the trench coat."],
+    replies: BOTS[0].replies,
+  },
+  "@sam_ships_it": {
+    openers: ["Great to match. I have a 12-slide deck and no code. Merge?", "I'll do the pitch, you do the part where it works."],
+    replies: [
+      "Love it. Let's call it a platform.",
+      "I can have the demo story ready in ten minutes. The demo itself, less so.",
+      "Disrupting. Whatever it is, we're disrupting it.",
+      "Deal. I'll bring the energy drinks and the slides.",
+      "Say less. Pre-revenue, post-snacks.",
+    ],
+  },
+  "@jensen_more_gpus": {
+    openers: ["Thanks for the match. Quick question: how many GPUs can you spare?", "I brought a leather jacket and an entire rack of GPUs. Merge?"],
+    replies: [
+      "The more you merge, the more you train.",
+      "We'll ship a model by morning. And a keynote by 3am.",
+      "One more thing: I need a frontend. And snacks.",
+      "My laptop has 47 stickers and zero RAM left. Let's merge.",
+      "Your idea needs more GPUs. Everything does.",
+    ],
+  },
+};
 
-export const isBot = (p: Pick<Profile, "handle"> | undefined) => !!botReplies(p);
+const lines = (p: Pick<Profile, "handle"> | undefined) => (p ? LINES[p.handle] : undefined);
+
+/** Canned replies if this profile is a demo character, else undefined. */
+export const botReplies = (p: Pick<Profile, "handle"> | undefined) => lines(p)?.replies;
+/** How a demo character opens the chat after a match, else undefined. */
+export const botOpeners = (p: Pick<Profile, "handle"> | undefined) => lines(p)?.openers;
+/** True for every featured demo character (rigged to like you in demo mode). */
+export const isBot = (p: Pick<Profile, "handle"> | undefined) => !!lines(p);
+
+/** Characters we removed. They may still sit in someone's local db.json, so hide them everywhere. */
+const RETIRED = new Set(["@leather_jacket_larry"]);
+export const isRetired = (p: Pick<Profile, "handle"> | undefined) => !!p && RETIRED.has(p.handle);

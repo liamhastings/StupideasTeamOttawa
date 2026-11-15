@@ -35,12 +35,14 @@ export async function POST(req: Request) {
     // anyone who already passed on you keeps that pass.
     const swiped = new Set(swipes.filter((s) => s.fromId === userId).map((s) => s.toId));
     const passedOnMe = new Set(swipes.filter((s) => s.toId === userId && s.action === "pass").map((s) => s.fromId));
+    const featuredCount = profiles.filter((p) => isBot(p) && p.id !== userId && !swiped.has(p.id) && !passedOnMe.has(p.id)).length;
     const picks = profiles
       .filter((p) => (p.id.startsWith("seed_") || isBot(p)) && p.id !== userId && !swiped.has(p.id) && !passedOnMe.has(p.id))
       .map((p) => ({ p, s: score(me, p).score }))
       // Demo characters first (they're the chat stars), then the best-scoring seeds.
       .sort((x, y) => Number(isBot(y.p)) - Number(isBot(x.p)) || y.s - x.s || x.p.id.localeCompare(y.p.id))
-      .slice(0, count)
+      // Featured characters (Agent Sleeper, Sam, Jensen) always make the cut, plus the best seeds up to `count`.
+      .slice(0, Math.max(count, featuredCount))
       .map((x) => x.p);
 
     for (const p of picks) await addSwipe({ fromId: p.id, toId: userId, action: "like" });
