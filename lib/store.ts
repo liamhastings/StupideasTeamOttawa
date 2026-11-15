@@ -11,7 +11,7 @@ import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
 import type { DB, Match, Profile, Swipe } from "./types";
-import { SEED_PROFILES } from "../data/seed";
+import { SEED_MATCHES, SEED_PROFILES, SEED_SWIPES } from "../data/seed";
 
 const DB_PATH = process.env.VERCEL
   ? path.join(os.tmpdir(), "grinder-db.json")
@@ -23,10 +23,25 @@ const KEY = "__grinder_db__";
 type G = typeof globalThis & { [KEY]?: DB };
 const g = globalThis as G;
 
+const isSeed = (id: string) => id.startsWith("seed_") || id.startsWith("demo_");
+
+// Seed profiles come from data/seed.ts (unless edited in the app, then the edit
+// wins). Seed swipes/matches are added if missing, so the demo always starts with
+// them in place.
 function withFreshSeeds(db: DB): DB {
+  const edited = new Set(db.editedSeeds ?? []);
+  const kept = db.profiles.filter((p) => !isSeed(p.id) || edited.has(p.id));
+  const keptIds = new Set(kept.map((p) => p.id));
+  const swipes = [...db.swipes];
+  for (const s of SEED_SWIPES)
+    if (!swipes.some((x) => x.fromId === s.fromId && x.toId === s.toId)) swipes.push(s);
+  const matches = [...db.matches];
+  for (const m of SEED_MATCHES) if (!matches.some((x) => x.id === m.id)) matches.push(m);
   return {
     ...db,
-    profiles: [...SEED_PROFILES, ...db.profiles.filter((p) => !p.id.startsWith("seed_"))],
+    profiles: [...SEED_PROFILES.filter((p) => !keptIds.has(p.id)), ...kept],
+    swipes,
+    matches,
   };
 }
 
@@ -86,6 +101,7 @@ export async function updateProfile(
   const i = db.profiles.findIndex((p) => p.id === id);
   if (i === -1) return undefined;
   db.profiles[i] = { ...db.profiles[i], ...patch };
+  if (isSeed(id) && !db.editedSeeds?.includes(id)) db.editedSeeds = [...(db.editedSeeds ?? []), id];
   await writeDB(db);
   return db.profiles[i];
 }
