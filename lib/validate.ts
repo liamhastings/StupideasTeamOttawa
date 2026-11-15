@@ -26,12 +26,22 @@ export function validateProfileInput(
     .filter((p) => p.question && p.answer)
     .slice(0, 3);
   const count = Number(b.hackathonCount);
+  // Photos arrive as small data URLs (resized client-side). Cap at ~400KB.
+  let avatarUrl: string | undefined;
+  if (typeof b.avatarUrl === "string" && b.avatarUrl) {
+    if (!/^data:image\/(png|jpeg|webp|gif);base64,/.test(b.avatarUrl))
+      return { ok: false, error: "That's not an image. That's a cry for help." };
+    if (b.avatarUrl.length > 400_000)
+      return { ok: false, error: "Photo too big. We're a JSON file, not Instagram." };
+    avatarUrl = b.avatarUrl;
+  }
   return {
     ok: true,
     value: {
       name,
       handle,
       avatarEmoji: str(b.avatarEmoji, 8) || "🧑‍💻",
+      avatarUrl,
       tagline: str(b.tagline, 120),
       bio: str(b.bio, 400),
       styleTags: strArr(b.styleTags, 12),
