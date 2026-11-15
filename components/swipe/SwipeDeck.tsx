@@ -74,32 +74,32 @@ export default function SwipeDeck({ deck, onSwipe, disabled = false }: SwipeDeck
       </div>
 
       {/* Sticky just above Ian's fixed TabBar (~4.25rem) so the buttons are never hidden on short phones. */}
-      <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-20 flex w-full items-end justify-center gap-6 bg-gradient-to-t from-white via-white/90 to-transparent pb-1 pt-4 font-mono">
-        <div className="flex flex-col items-center gap-2">
+      <div className="sticky bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-20 -mb-6 flex w-[calc(100%+2rem)] items-center justify-center gap-5 border-t-2 border-[#111] bg-white px-4 py-2 font-mono">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => swipe("pass")}
             disabled={disabled || deck.length === 0}
             aria-label="Pass on this hacker (left arrow)"
-            className="border-2 border-[#111] bg-white px-5 py-3 text-lg font-black text-[#111] shadow-[4px_4px_0_#111] transition active:translate-x-1 active:translate-y-1 active:shadow-none disabled:pointer-events-none disabled:opacity-40"
+            className="border-2 border-[#111] bg-white px-4 py-2 text-base font-black text-[#111] shadow-[3px_3px_0_#111] transition active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:pointer-events-none disabled:opacity-40"
           >
             [ X ]
           </button>
-          <span className="text-xs text-neutral-500" aria-hidden>
+          <span className="hidden text-xs text-neutral-500 sm:inline" aria-hidden>
             <kbd className="border border-neutral-400 px-1">&lt;-</kbd> git rm
           </span>
         </div>
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => swipe("like")}
             disabled={disabled || deck.length === 0}
             aria-label="Like this hacker (right arrow)"
-            className="border-2 border-[#111] bg-[#111] px-6 py-3 text-lg font-black text-white shadow-[4px_4px_0_#888] transition active:translate-x-1 active:translate-y-1 active:shadow-none disabled:pointer-events-none disabled:opacity-40"
+            className="border-2 border-[#111] bg-[#111] px-5 py-2 text-base font-black text-white shadow-[3px_3px_0_#888] transition active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:pointer-events-none disabled:opacity-40"
           >
             [ &lt;3 ]
           </button>
-          <span className="text-xs text-neutral-500" aria-hidden>
+          <span className="hidden text-xs text-neutral-500 sm:inline" aria-hidden>
             git merge <kbd className="border border-neutral-400 px-1">-&gt;</kbd>
           </span>
         </div>
