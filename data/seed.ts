@@ -267,8 +267,7 @@ export const SEED_MATCHES: Match[] = [
   { id: "seed_match_spy", userAId: DEMO_USER_ID, userBId: "seed_spy", score: 91, createdAt: T },
 ];
 
-// Drawn demo hackers, not in the demo any more. Add  ...DRAWN_PROFILES  to
-// SEED_PROFILES to bring them back.
+// Drawn demo hackers. lib/store.ts seeds them alongside SEED_PROFILES so they're in Discover.
 export const DRAWN_PROFILES: Profile[] = [
   {
     id: "seed_01",

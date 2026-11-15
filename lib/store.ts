@@ -11,7 +11,10 @@ import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
 import type { DB, Match, Profile, Swipe } from "./types";
-import { SEED_MATCHES, SEED_PROFILES, SEED_SWIPES } from "../data/seed";
+import { DRAWN_PROFILES, SEED_MATCHES, SEED_PROFILES, SEED_SWIPES } from "../data/seed";
+
+// The real/featured cast plus the drawn demo hackers, so Discover has everyone.
+const ALL_SEEDS = [...SEED_PROFILES, ...DRAWN_PROFILES.filter((d) => !SEED_PROFILES.some((p) => p.id === d.id))];
 
 const DB_PATH = process.env.VERCEL
   ? path.join(os.tmpdir(), "grinder-db.json")
@@ -39,7 +42,7 @@ function withFreshSeeds(db: DB): DB {
   for (const m of SEED_MATCHES) if (!matches.some((x) => x.id === m.id)) matches.push(m);
   return {
     ...db,
-    profiles: [...SEED_PROFILES.filter((p) => !keptIds.has(p.id)), ...kept],
+    profiles: [...ALL_SEEDS.filter((p) => !keptIds.has(p.id)), ...kept],
     swipes,
     matches,
   };
