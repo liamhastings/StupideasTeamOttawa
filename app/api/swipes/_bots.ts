@@ -71,9 +71,45 @@ export async function ensureBots(): Promise<Profile[]> {
   return out;
 }
 
-/** Canned replies if this profile is a demo character, else undefined. */
-export function botReplies(p: Pick<Profile, "handle"> | undefined): string[] | undefined {
-  return p ? BOTS.find((b) => b.profile.handle === p.handle)?.replies : undefined;
-}
+// Lines for every featured demo character (the two created above plus Sam and Jensen, who are
+// hardcoded in data/seed.ts). Keyed by handle. `openers` is how they start the chat after you
+// match; `replies` is how they answer you.
+const LINES: Record<string, { openers: string[]; replies: string[] }> = {
+  "@leather_jacket_larry": {
+    openers: ["You matched with the most GPUs in the building.", "Quick question: do you have a GPU, or just feelings?"],
+    replies: BOTS[0].replies,
+  },
+  "@agent_sleeper": {
+    openers: ["Hello, fellow hacker. I am also a hacker. Normal.", "Nice to meet you. Do not ask what is in the trench coat."],
+    replies: BOTS[1].replies,
+  },
+  "@sam_ships_it": {
+    openers: ["Great to match. I have a 12-slide deck and no code. Merge?", "I'll do the pitch, you do the part where it works."],
+    replies: [
+      "Love it. Let's call it a platform.",
+      "I can have the demo story ready in ten minutes. The demo itself, less so.",
+      "Disrupting. Whatever it is, we're disrupting it.",
+      "Deal. I'll bring the energy drinks and the slides.",
+      "Say less. Pre-revenue, post-snacks.",
+    ],
+  },
+  "@jensen_more_gpus": {
+    openers: ["Thanks for the match. Quick question: how many GPUs can you spare?", "I brought a leather jacket and an entire rack of GPUs. Merge?"],
+    replies: [
+      "The more you merge, the more you train.",
+      "We'll ship a model by morning. And a keynote by 3am.",
+      "One more thing: I need a frontend. And snacks.",
+      "My laptop has 47 stickers and zero RAM left. Let's merge.",
+      "Your idea needs more GPUs. Everything does.",
+    ],
+  },
+};
 
-export const isBot = (p: Pick<Profile, "handle"> | undefined) => !!botReplies(p);
+const lines = (p: Pick<Profile, "handle"> | undefined) => (p ? LINES[p.handle] : undefined);
+
+/** Canned replies if this profile is a demo character, else undefined. */
+export const botReplies = (p: Pick<Profile, "handle"> | undefined) => lines(p)?.replies;
+/** How a demo character opens the chat after a match, else undefined. */
+export const botOpeners = (p: Pick<Profile, "handle"> | undefined) => lines(p)?.openers;
+/** True for every featured demo character (rigged to like you in demo mode). */
+export const isBot = (p: Pick<Profile, "handle"> | undefined) => !!lines(p);
