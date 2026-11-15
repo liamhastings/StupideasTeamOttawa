@@ -46,7 +46,7 @@ export const SEED_PROFILES: Profile[] = [
     name: "Mia Matcha",
     handle: "@matchamia",
     avatarEmoji: "🧋",
-    avatarUrl: photo("zz-test.svg") || avatar({ bg: "#3ddc97", skin: SKIN.light, hair: "bun", hairColor: "#6b3e26", shirt: "#f2f4fb", mouth: "smile", blush: true, prop: "🍵" }),
+    avatarUrl: avatar({ bg: "#3ddc97", skin: SKIN.light, hair: "bun", hairColor: "#6b3e26", shirt: "#f2f4fb", mouth: "smile", blush: true, prop: "🍵" }),
     tagline: "Matcha first. Merge conflicts later.",
     bio: "Product designer who judges your font choices silently, then loudly. Can turn a cursed wireframe into something a VC would frame. Brings her own whisk.",
     styleTags: ["matcha enjoyer", "light mode psychopath", "organized chaos"],
