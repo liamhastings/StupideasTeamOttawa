@@ -1,26 +1,40 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* Grinder theme. Owned by Ian. Dark only: the venue lights are off. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-floor: #12141c;   /* app background */
+  --color-slab: #1c1f2b;    /* sheets, bubbles, rows */
+  --color-edge: #2b3042;    /* borders */
+  --color-snow: #f2f4fb;    /* text on dark */
+  --color-dim: #9aa1b8;     /* secondary text */
+  --color-badge: #f1f3f9;   /* name-badge paper */
+  --color-ink: #12141c;     /* text on badge / on yellow */
+  --color-hi: #ffe14d;      /* highlighter yellow: primary action */
+  --color-ship: #ff5a3c;    /* ship-it coral: decline, urgency */
+  --color-ok: #3ddc97;      /* merged / approved */
+  --color-sky: #7aa2ff;     /* lanyard blue */
+  --font-display: var(--font-unbounded);
+  --font-sans: var(--font-hanken);
+  --font-mono: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html { color-scheme: dark; background: var(--color-floor); }
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-floor);
+  color: var(--color-snow);
+  font-family: var(--font-hanken), system-ui, sans-serif;
+}
+:focus-visible { outline: 2px solid var(--color-hi); outline-offset: 2px; }
+
+@keyframes ticker { to { transform: translateX(-50%); } }
+.ticker-track { animation: ticker 32s linear infinite; }
+
+/* Match modal: the two badges slide together. Plays once, on open. */
+@keyframes merge-left { from { transform: translateX(-70px) rotate(-14deg); } to { transform: translateX(14px) rotate(-6deg); } }
+@keyframes merge-right { from { transform: translateX(70px) rotate(14deg); } to { transform: translateX(-14px) rotate(6deg); } }
+.merge-left { animation: merge-left 0.55s cubic-bezier(.2,.9,.3,1.2) both; }
+.merge-right { animation: merge-right 0.55s cubic-bezier(.2,.9,.3,1.2) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track, .merge-left, .merge-right { animation: none; }
 }
