@@ -29,9 +29,12 @@ export async function POST(req: Request) {
     if (!me) return NextResponse.json({ error: "No hacker with that id. Go make a profile." }, { status: 404 });
 
     // Candidates still in your deck (you haven't swiped on them), best match first.
+    // Only seed profiles do the rigging (real users' swipes are never forged), and
+    // anyone who already passed on you keeps that pass.
     const swiped = new Set(swipes.filter((s) => s.fromId === userId).map((s) => s.toId));
+    const passedOnMe = new Set(swipes.filter((s) => s.toId === userId && s.action === "pass").map((s) => s.fromId));
     const picks = profiles
-      .filter((p) => p.id !== userId && !swiped.has(p.id))
+      .filter((p) => p.id.startsWith("seed_") && p.id !== userId && !swiped.has(p.id) && !passedOnMe.has(p.id))
       .map((p) => ({ p, s: score(me, p).score }))
       .sort((x, y) => y.s - x.s || x.p.id.localeCompare(y.p.id))
       .slice(0, count)
@@ -41,7 +44,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       rigged: picks.map((p) => ({ id: p.id, name: p.name })),
       message: picks.length
-        ? `${picks.length} hackers already like you. Swipe right on them for instant chemistry.`
+        ? `${picks.length} hacker${picks.length === 1 ? "" : "s"} already ${picks.length === 1 ? "likes" : "like"} you. Swipe right for instant chemistry.`
         : "Nobody left in your deck to rig. You've swiped on everyone. Touch grass.",
     });
   });

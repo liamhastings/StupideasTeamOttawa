@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import { getProfiles, getSwipes } from "@/lib/store";
 import { score } from "@/lib/scoring";
+import { withSwipeLock } from "../swipes/_lock";
 
 export async function GET(req: Request) {
   const userId = new URL(req.url).searchParams.get("userId")?.trim();
@@ -13,7 +14,8 @@ export async function GET(req: Request) {
     );
   }
 
-  const [profiles, swipes] = await Promise.all([getProfiles(), getSwipes()]);
+  // Read under the swipe lock so we never read db.json mid-write (see _lock.ts).
+  const [profiles, swipes] = await withSwipeLock(() => Promise.all([getProfiles(), getSwipes()]));
   const me = profiles.find((p) => p.id === userId);
   if (!me) {
     return NextResponse.json(
