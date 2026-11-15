@@ -1,5 +1,4 @@
 "use client";
-import Countdown from "@/components/layout/Countdown";
 import Logo from "@/components/layout/Logo";
 import Avatar from "@/components/ui/Avatar";
 import BadgeTile from "@/components/ui/BadgeTile";
@@ -67,16 +66,12 @@ export default function Landing() {
         </Button>
       </header>
 
-      <section className="mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 pt-8 lg:grid-cols-[1.15fr_0.85fr] lg:pt-16">
+      <section className="mx-auto grid max-w-6xl items-start gap-14 px-5 pb-20 pt-8 lg:grid-cols-[1.15fr_0.85fr] lg:pt-16">
         <div>
           <h1 className="font-display text-5xl font-black leading-[0.98] tracking-tight sm:text-6xl lg:text-7xl">
             Find your perfect teammate. 0 miles away.
           </h1>
-          <p className="mt-6 flex flex-wrap items-baseline gap-x-3 text-xl text-dim">
-            <Countdown className="text-3xl font-bold text-hi sm:text-4xl" />
-            until demos. Swipe fast.
-          </p>
-          <p className="mt-4 max-w-md text-dim">
+          <p className="mt-6 max-w-md text-dim">
             Swipe on like-minded hustlers by vibe and skill. Like, match, chat,
             and merge teams. No romance. Only hustling. Remember: horse don't
             stop.
@@ -88,25 +83,19 @@ export default function Landing() {
           </div>
         </div>
 
-        <div className="relative mx-auto h-[27rem] w-full max-w-sm" aria-hidden>
-          <BadgeTile
-            profile={sample[0]}
-            score={78}
-            tilt={-8}
-            className="absolute left-0 top-12 w-44"
-          />
-          <BadgeTile
-            profile={sample[2]}
-            score={83}
-            tilt={9}
-            className="absolute right-0 top-28 w-44"
-          />
-          <BadgeTile
-            profile={sample[1]}
-            score={91}
-            tilt={2}
-            className="absolute left-16 top-0 z-10 w-48"
-          />
+        <div
+          className="relative mx-auto -mt-8 h-[19rem] w-full max-w-sm"
+          aria-hidden
+        >
+          <div className="absolute left-0 top-14 w-[42%]">
+            <BadgeTile profile={sample[0]} score={78} tilt={-8} />
+          </div>
+          <div className="absolute left-[58%] top-16 w-[42%]">
+            <BadgeTile profile={sample[2]} score={83} tilt={9} />
+          </div>
+          <div className="absolute left-[27%] top-0 z-10 w-[46%]">
+            <BadgeTile profile={sample[1]} score={91} tilt={2} />
+          </div>
         </div>
       </section>
 
@@ -148,11 +137,6 @@ export default function Landing() {
             </li>
           ))}
         </ul>
-        <div className="mt-10 text-center">
-          <Button href={cta} className="px-8 py-4 text-lg">
-            {userId ? "Back to the grind" : "Create your badge"}
-          </Button>
-        </div>
       </section>
 
       <footer className="border-t border-edge py-8 text-center text-sm text-dim">
