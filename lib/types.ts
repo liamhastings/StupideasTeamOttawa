@@ -5,6 +5,7 @@ export interface Profile {
   name: string;
   handle: string; // Discord/Telegram etc., only revealed after match
   avatarEmoji: string;
+  avatarUrl?: string; // optional uploaded photo (small JPEG data URL); falls back to avatarEmoji
   tagline: string;
   bio: string;
   styleTags: string[]; // from lib/tags.ts STYLE_TAGS

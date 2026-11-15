@@ -26,6 +26,7 @@ Never commit directly to main except Liam's Step 0 scaffold. Commit small, push 
       name: string
       handle: string            // Discord/Telegram etc., only revealed after match
       avatarEmoji: string
+      avatarUrl?: string        // optional uploaded photo (small JPEG data URL). Render via ProfileCard or its exported <Avatar>, which falls back to the emoji.
       tagline: string
       bio: string
       styleTags: string[]       // from lib/tags.ts STYLE_TAGS
