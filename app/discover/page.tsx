@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
+import MatchOverlay from "@/components/swipe/MatchOverlay";
 import SwipeDeck from "@/components/swipe/SwipeDeck";
 import { EmptyState, ErrorState, LoadingState } from "@/components/swipe/States";
 import type { DeckItem, SwipeAction } from "@/components/swipe/types";
@@ -29,8 +30,10 @@ export default function DiscoverPage() {
   const [deck, setDeck] = useState<DeckItem[]>([]);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
-  // Step 5 placeholder: step 6 swaps this banner for the full "IT'S A MATCH!" overlay.
-  const [justMatched, setJustMatched] = useState<{ item: DeckItem; match: Match } | null>(null);
+  // Matches waiting to be celebrated. A queue, so two quick matches each get their moment.
+  const [matchQueue, setMatchQueue] = useState<{ item: DeckItem; match: Match }[]>([]);
+  // Your own avatar for the overlay. Cosmetic: falls back to a generic hacker if the fetch fails.
+  const [me, setMe] = useState({ avatarEmoji: "🧑‍💻", name: "You" });
 
   const load = useCallback(
     async (uid: string, demo: boolean) => {
@@ -45,8 +48,13 @@ export default function DiscoverPage() {
           const rigBody = (await readJson(rig)) as { message?: string } | null;
           if (rig.ok && rigBody?.message) setNotice(`🎲 Demo mode: ${rigBody.message}`);
         }
-        const res = await fetch(`/api/discover?userId=${encodeURIComponent(uid)}`, { cache: "no-store" });
+        const [res, meRes] = await Promise.all([
+          fetch(`/api/discover?userId=${encodeURIComponent(uid)}`, { cache: "no-store" }),
+          fetch(`/api/profiles/${encodeURIComponent(uid)}`, { cache: "no-store" }).catch(() => null),
+        ]);
         const body = await readJson(res);
+        const meBody = meRes?.ok ? ((await readJson(meRes)) as { avatarEmoji?: string; name?: string } | null) : null;
+        if (meBody?.avatarEmoji) setMe({ avatarEmoji: meBody.avatarEmoji, name: meBody.name || "You" });
         if (res.status === 404) {
           // Stale id in localStorage (db got wiped). Start over.
           clearUserId();
@@ -106,7 +114,11 @@ export default function DiscoverPage() {
         }
         if (!res.ok) throw new Error(errorText(body, `HTTP ${res.status}`));
         const data = body as { matched?: boolean; match?: Match };
-        if (data.matched && data.match) setJustMatched({ item, match: data.match });
+        if (data.matched && data.match) {
+          const match = data.match;
+          // A repeat swipe returns the same match: never queue one twice.
+          setMatchQueue((q) => (q.some((m) => m.match.id === match.id) ? q : [...q, { item, match }]));
+        }
       } catch (e) {
         // Put the card back so nobody gets silently ghosted.
         setDeck((d) => (d.some((x) => x.profile.id === item.profile.id) ? d : [item, ...d]));
@@ -115,6 +127,10 @@ export default function DiscoverPage() {
     },
     [router],
   );
+
+  // Id-based so a double close can never skip the next queued match.
+  const closeMatch = useCallback((id: string) => setMatchQueue((q) => q.filter((m) => m.match.id !== id)), []);
+  const activeMatch = matchQueue[0];
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center px-4 py-6">
@@ -141,24 +157,12 @@ export default function DiscoverPage() {
         (deck.length === 0 ? (
           <EmptyState onRefresh={retry} />
         ) : (
-          <SwipeDeck deck={deck} onSwipe={handleSwipe} />
+          <SwipeDeck deck={deck} onSwipe={handleSwipe} disabled={!!activeMatch} />
         ))}
 
-      {justMatched && (
-        <div className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-md rounded-2xl border border-pink-500 bg-neutral-950 p-4 text-center shadow-2xl">
-          <p className="font-black text-pink-400">
-            IT&apos;S A MATCH with {justMatched.item.profile.name}! {justMatched.item.profile.avatarEmoji}
-          </p>
-          <div className="mt-3 flex justify-center gap-3">
-            <Link href="/matches" className="rounded-full bg-pink-600 px-4 py-1.5 text-sm font-semibold">
-              Go to Matches
-            </Link>
-            <button type="button" onClick={() => setJustMatched(null)} className="rounded-full border border-white/20 px-4 py-1.5 text-sm">
-              Keep swiping
-            </button>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {activeMatch && <MatchOverlay key={activeMatch.match.id} item={activeMatch.item} me={me} onClose={() => closeMatch(activeMatch.match.id)} />}
+      </AnimatePresence>
     </main>
   );
 }
