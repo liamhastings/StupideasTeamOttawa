@@ -1,0 +1,2 @@
+# StupideasTeamOttawa
+Stupideas Hackathon Repo
