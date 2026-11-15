@@ -149,3 +149,33 @@ export function score(a: Profile, b: Profile): Compat {
   if (reasons.length === 0) reasons.push(pick(FALLBACKS, a.id + b.id));
   return { score: total, reasons: reasons.slice(0, 3) };
 }
+
+// Sweaty level: how cracked is this hacker, 1-10. Pure, derived from existing profile data
+// (no contract change). Experience sets the base; sweaty tags push it up, grass pulls it down.
+const SWEATY = new Set(
+  [
+    "sleeps under the desk",
+    "energy drink IV drip",
+    "no sleep, only deploy",
+    "commits at 4am",
+    "works best at 3am",
+    "can run on 2 hours of sleep",
+    "7 hackathons deep",
+    "Linux god",
+    "Arch btw",
+    "vim exit-code survivor",
+    "mechanical keyboard cultist",
+    "git push --force enjoyer",
+    "cold-brew dependent",
+    "headphones permanently on",
+  ].map(norm),
+);
+const GRASSY = new Set(["touches grass (allegedly)", "plans everything, builds nothing", "reads the docs (rare)"].map(norm));
+
+export function sweatLevel(p: Profile): number {
+  const tags = [...(p.styleTags ?? []), ...(p.skillTags ?? [])].map(norm);
+  const sweaty = new Set(tags.filter((t) => SWEATY.has(t))).size;
+  const grassy = new Set(tags.filter((t) => GRASSY.has(t))).size;
+  const base = 1 + Math.min(4, Math.log2(1 + cleanCount(p.hackathonCount)) * 1.4); // 0 events = 1, 10+ = ~5
+  return Math.max(1, Math.min(10, Math.round(base + sweaty * 1.2 - grassy)));
+}
